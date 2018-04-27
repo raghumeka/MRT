@@ -289,31 +289,29 @@ Let $B$ be a 3ROBP and let $\rho_0$ be a pseudorandom assignment as in Claim~\re
 To carry the induction forward as outlined above, we need the following technical lemma. 
 
 \begin{claim}\label{claim:simplifyerror}
-For all constants $c,C$, there exists $\alpha \in (0,1)$ such that the following holds. Let $\ell \leq \log(n/\epsilon)$, and let $F(x) = \wedge_{i=1}^m (\neg F_i(x))$ where $F_i$ are $(3,\ell,1)$-ROBPs on disjoint variables with $m \leq C^\ell$ and $Pr[F(x) = 1] < 2^{-2^{c \ell}}$. Then, for a sufficiently small constant parameter $\alpha$, and $\rho$ a pseudorandom assignment as in Claim~\ref{claim:assigning}, with probability at least $1 - O(\alpha)^{\ell}$, we can write $F_\rho(x) = \wedge_{i=1}^{m'} (\neg F_i'(x))$ where $F_i'$ are $(3,\ell/2,1)$-ROBPs on disjoint variables with $m' \leq C^{\ell/2}$ and $Pr[F(x) = 1] < 2^{-2^{c \ell/2}} + n^2 \epsilon$. 
+For all constants $c$ and $C > 8$, there exists $\alpha \in (0,1)$ such that the following holds. Let $\ell \leq \log(n/\epsilon)$, and let $F(x) = \wedge_{i=1}^m (\neg F_i(x))$ where $F_i$ are $(3,\ell,1)$-ROBPs on disjoint variables with $m \leq C^\ell$ and $Pr[F(x) = 1] < 2^{-2^{c \ell}}$. Then, for a sufficiently small constant parameter $\alpha$, and $\rho$ a pseudorandom assignment as in Claim~\ref{claim:assigning}, with probability at least $1 - C^{\ell/2}$, we can write $F_\rho(x) = \wedge_{i=1}^{m'} (\neg F_i'(x))$ where $F_i'$ are $(3,\ell/2,1)$-ROBPs on disjoint variables with $m' \leq C^{\ell/2}$ and $Pr[F(x) = 1] < 2^{-2^{c \ell/2}} + n^2 \epsilon$. 
 \end{claim} 
 \begin{proof}
-\Rnote{Almost done. Need to fix this proof. We could also move this to the appendix.}
-
-	First, we show that with high probability, each $\FCol_i$ has at most $\ell/2$ colliding layers under the pseudo-random restriction. 
+	First, we show that with high probability, each $F_i$ has at most $\ell/2$ colliding layers under the pseudo-random restriction. 
 	To see it, note that any colliding layer that is restricted can be either:
 	\begin{itemize}
-		\item assigned to a value that reduces the width of the original program to $2$, and thus the width of $\FCol_i$ to 1, in which case every previous layer in $\FCol_i$ is not affecting the value of $\FCol_i$.
-		\item assigned to a value that applies a permutation on the states of the program, thus reducing the number of colliding layers.
+		\item Assigned to a value that reduces the width of the original program to $2$, and thus the width of $F_i$ to 1, in which case every previous layer in $F_i$ is not affecting the value of $F_i$.
+		\item Assigned to a value that applies a permutation on the states of the program, thus reducing the number of colliding layers.
 	\end{itemize}  
-	In either cases, if $k$ colliding layers are unassigned, then $\FCol_i|_{\rho}$ can be a computed by a 3ROBP with at most $k$ colliding layers.
+	In either case, if $k$ colliding layers are unassigned, then $F_i|_{\rho}$ can be a computed by a 3ROBP with at most $k$ colliding layers.
 	%Since the selection is done using a $\poly(\eps/n)$-biased distribution, 
-	By Claim~\ref{claim:assigning} the probability that less than $\ell/2$ colliding layers are unassigned is at least $1-40^{-\ell}$.
-	Taking a union bound over the $20^{\ell}$ functions $\{\FCol_i\}_{i=1}^{m}$ we get that with probability at least $1-2^{-\ell}$ all functions $\{\FCol_i|_{\rho}\}_{i=1}^{m}$ can be computed by 3ROBPs with have at most $\ell/2$ colliding layers.
+	By Claim~\ref{claim:assigning} the probability that less than $\ell/2$ colliding layers are unassigned is at least $1- 2 \alpha^{-\ell}$.
+	Taking a union bound over the $C^{\ell}$ functions $\{F_i\}_{i=1}^{m}$ we get that with probability at least $1-2 (C \alpha)^{\ell}$ all functions $\{F_i|_{\rho}\}_{i=1}^{m}$ can be computed by 3ROBPs with at most $\ell/2$ colliding layers.
 	
-	We move to show that with high probability at least $\sqrt{m}$ of the functions $\FCol_i|_{\rho}$ are non-zero.
+	We move to show that with high probability at least $C^{\ell/2}$ of the functions $F_i|_{\rho}$ are non-zero.
 	We apply the second moment method. 
-	Denote by $p_i = \Pr_{z\sim U}[\FCol_i(z)]$ for $i=1, \ldots, m$.
-	Let $A_1, \ldots, A_m$ be the events that $\{(\FCol_i)|_{\rho}(y) =1\}_{i=1}^{m}$ respectively, where $\rho$ is the pseudo-random restriction from Claim~\ref{claim:assigning} and $y \sim U_{\rho^{-1}(*)}$.
+	Denote by $p_i = \Pr_{z\sim U}[F_i(z)]$ for $i=1, \ldots, m$.
+	Let $A_1, \ldots, A_m$ be the events that $\{(F_i)|_{\rho}(y) =1\}_{i=1}^{m}$ respectively, where $\rho$ is the pseudo-random restriction from Claim~\ref{claim:assigning} and $y \sim U_{\rho^{-1}(*)}$.
 	By Claim~\ref{claim:assigning}
-	$$\Pr[A_i] = \Pr_{\rho,y}[(\FCol_i)|_{\rho}(y) =1] = \E_{z\sim U}[\FCol_i(z)] \pm \poly(\eps/n) = p_i \pm \poly(\eps/n),$$
+	$$\Pr[A_i] = \Pr_{\rho,y}[(F_i)|_{\rho}(y) =1] = \E_{z\sim U}[F_i(z)] \pm \poly(\eps/n) = p_i \pm \poly(\eps/n),$$
 	and by the next lemma, whose proof is deferred to Appendix~\ref{app:composition 3ROBPs}, we get
-	\begin{align*}\Pr[A_i \wedge A_j] &= \Pr_{\rho,y}[(\FCol_i)|_{\rho}(y) \wedge (\FCol_j)|_{\rho}(y) =1]\\
-	&= \E_{z\sim U}[\FCol_i(z)\wedge \FCol_j(z)] \pm \poly(\eps/n) = p_i p_j \pm \poly(\eps/n).
+	\begin{align*}\Pr[A_i \wedge A_j] &= \Pr_{\rho,y}[(F_i)|_{\rho}(y) \wedge (F_j)|_{\rho}(y) =1]\\
+	&= \E_{z\sim U}[F_i(z)\wedge F_j(z)] \pm \poly(\eps/n) = p_i p_j \pm \poly(\eps/n).
 	\end{align*}	
 
 \begin{lemma}\label{lemma:fooling H of width-3}
@@ -323,10 +321,10 @@ Then, $f = H(f_1, f_2, \ldots, f_k)$ is $\eps\cdot ((n+k)/k)^k$-fooled by the ps
 \end{lemma}
 	Thus, the covariance of the two events is at most $\eps' := \poly(\eps/n)$.	
 	We get that the probability that at most $\sum_{i}{p_i/2}$ of the events $A_1, \ldots, A_m$ occur is at most 
-	$(\sum_{i=1}^{m} {p_i} + \eps' m^2)/(\sum_{i=1}^{m}p_i/2 - \eps' m)^2 \le O(1/\sum_{i=1}^{m}p_i) \le 2^{-2\ell}$.
-	In the complement event, at least $\sum_{i}{p_i/2}$ of the events $A_1, \ldots, A_m$ occur, and in particular at least $\sum_{i}{p_i/2} \ge m \cdot 2^{-2(\ell+1)-1} \ge 20^{\ell/2}$ (using $\ell \ge 24$) of the restricted functions $\{\FCol_i|_\rho\}_{i=1}^m$ are non-zero. 
+	$(\sum_{i=1}^{m} {p_i} + \eps' m^2)/(\sum_{i=1}^{m}p_i/2 - \eps' m)^2 \le O(1/\sum_{i=1}^{m}p_i) \le  2^{2(\ell+1)}/m$.
+	In the complement event, at least $\sum_{i}{p_i/2}$ of the events $A_1, \ldots, A_m$ occur, and in particular at least $\sum_{i}{p_i/2} \ge m \cdot 2^{-2(\ell+1)-1} \ge C^{\ell/2}$ (using $\ell \ge 24$) of the restricted functions $\{F_i|_\rho\}_{i=1}^m$ are non-zero. 
 
-Suppose that at least $20^{\ell/2}$ of the restricted functions $\{\FCol_i|_\rho\}_{i=1}^m$ are non-zero, and that all restricted functions has at most $\ell/2$ colliding layers. By the above analysis this happens with probability at least $1-2\cdot 2^{-\ell}$. Under this assumption, we can reduce the number of functions to be exactly $\sqrt{m} = 20^{\ell/2}$, resulting in an upper bound on $E|_{\rho}$ which we denote by $\mE(x) \triangleq \bar{\FCol'_{1}(x)} \wedge \ldots \wedge \bar{\FCol'_{\sqrt{m}}(x)} $.
+Suppose that at least $C^{\ell/2}$ of the restricted functions $\{F_i|_\rho\}_{i=1}^m$ are non-zero, and that all restricted functions has at most $\ell/2$ colliding layers. By the above analysis this happens with probability at least $1-C^{-\ell/2}$. Under this assumption, we can reduce the number of functions to be exactly $m' = C^{\ell/2}$, resulting in an upper bound on $E|_{\rho}$ which we denote by $\mE(x) \triangleq \bar{F'_{1}(x)} \wedge \ldots \wedge \bar{F'_{m'}(x)} $.
 %It remains to show that the probability that $\mE(x)=1$ is exponentially small in $\ell$. Indeed, using  Claim~\ref{claim:pv-large}, $\mE(x)=1$ with probability at most $(1-2^{-2(\ell/2+1)})^{20^{\ell/2}} \ll 2^{-\ell}$.
 %
 %	It remains to show that we can reduce the number of  functions in case there are more than $20^{\ell/2}$ functions that are non-zero after the restriction without increasing the error by too much.
