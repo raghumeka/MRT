@@ -1,0 +1,607 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% !TEX root = MRT.tex
+
+\newcommand{\mE}{{\mathcal{E}}}
+\newcommand{\BRRY}{{\mathbf{BRRY}}}
+\newcommand{\Col}{{\mathsf{Col}}}
+\newcommand{\FCol}{{\mathsf{FCol}}}
+
+\section{Pseudorandom generators for width-3 ROBPs}
+
+In this section, we construct pseudorandom generators fooling width-3 ROBPs with seed-length $\tilde{O}(\log n)$. For ordered width-3 ROBPs we can guarantee error $1/\poly\log(n)$ using seed-length $\tilde{O}(\log n)$, and for unordered width-3  ROBPs we can guarantee error $1/\poly\log\log(n)$ for the same seed-length:
+
+\begin{theorem}[Main Theorem]\label{thm:main-3ROBP-ordered}
+For any $\epsilon > 0$, there exists an explicit PRG that $\delta$-fools ordered 3ROBPs with seed-length $\tilde{O}(\log(n/\delta)) + O((\log(1/\delta)) \cdot (\log n))$. 
+\end{theorem}
+
+Note that in comparison, even for constant $\delta > 0$, the best previous generators had seed-length $O(\log^2 n)$ for ordered 3ROBPs. We also get similar improvements for unordered 3ROBPs but with worse dependence on the error $\delta$. 
+
+\begin{theorem}\label{thm:main-3ROBP-unordered}
+For any $\epsilon > 0$, there exists an explicit PRG that $\delta$-fools ordered 3ROBPs with seed-length $\tilde{O}(\log(n/\delta)) + O( \poly(1/\delta) \cdot (\log n))$
+\end{theorem}
+
+
+
+\subsection{Proof overview}
+
+
+We heavily rely on the pseudorandom restriction from Theorem~\ref{thm:main_two_steps} that assigns $p = 1/\poly \log \log (n)$ of the variables while changing the acceptance probability by at most $\poly(\eps/n)$. As a first step we assign a constant fraction of the coordinates.
+
+\paragraph{Assigning 0.9999 of the coordinates.} The first step is rather simple: we apply iteratively the pseudorandom restriction from Theorem~\ref{thm:main_two_steps} $O(1/p)$ times to get the following analog result to Claim~\ref{claim:assigning-0.9999}.
+The proof is the same as that of Claim~\ref{claim:assigning-0.9999} and is omitted.
+
+\begin{claim}\label{claim:assigning}
+For all constants $\alpha \in (0,1)$, there is a pseudorandom restriction that leaves each variable unfixed with probability at most $\alpha$, using at most $\log(n/\eps) \cdot \poly(\log\log(n/\eps))$ random bits, and changing the acceptance probability of width-3 ROBPs by at most $\poly(\eps/n)$.
+
+Furthermore, any fixed set $S\subseteq[n]$ of  $k \le 5\log(n/\eps)$ variables remains alive with probability at most $2 \alpha^k$.\end{claim}
+
+Let $B$ be a 3ROBP of length-$n$. First, we claim that after applying the pseudorandom restriction $\rho$ in Claim~\ref{claim:assigning}, with high probability (at least $1-\poly(\eps/n)$), $B|_{\rho}$ has a simpler structure in that there will be several width two layers in $B|_{\rho}$ and furthermore, between any two width two layers the subprogram has $O(\log(n/\eps))$ \emph{colliding layers}. Concretely, we use the following definitions. 
+
+\begin{definition}
+Given a ROBP $B$, we call a layer of edges {\sf colliding} if either the edges marked by $0$ and the edges marked by $1$ collide.
+
+We call a ROBP $B$ a $(w, \ell,m)$-ROBP if $B$ can be written as $D_1 \circ D_2 \circ \ldots \circ D_m$, with each $D_i$ being a width $w$ ROBP with the first and last layers having at most two vertices and each $D_i$ having at most $\ell$ colliding layers.
+\end{definition}
+
+We show that after applying the pseudorandom restriction $\rho$ in Claim~\ref{claim:assigning}, with high probability the restricting ROBP $B|_\rho$ is a $(3,O(\log(n/\epsilon)),m)$-ROBPs. Now, similar to Section~\ref{sec:assign_all}, we wish to iteratively apply Claim~\ref{claim:assigning}, making the ROBP simpler in each step. We will have one progress measures on the restricted ROBP: the maximal number of colliding layers in a subprogram (denoted $\ell$). We show that the number of colliding layers reduces by a constant-factor in each iteration. To do so, we show a structural result on $(3,\ell,m)$-ROBPs that such ROBPs can be approximated by $(3,\ell, C^\ell)$-ROBPs for some constant $C$. This allows us to not worry about the number of sub-programs and use the number of colliding layers as a progress measure. Applying the restriction and the structure result $O(\log\log n)$ times, we end up with a ROBP where $\ell = O(\log \log n)$. We also show that ROBPs with few colliding layers are fooled by the INW generator. This follows from the results of \cite{BravermanRRY10}
+
+%This should be thought of as the starting point. 
+
+
+\ignore{Similarly to Section~\ref{sec:assign_all}, we wish to iteratively apply Claim~\ref{claim:assigning}, making the ROBP simpler in each step. We will have two progress measures on the restricted ROBP $D_1 \circ D_2 \circ \ldots \circ D_m$: the maximal number of colliding layers in a subprogram (denoted $\ell$), and the number of subprograms (denoted $m$). 
+We shall show that the former reduces by a factor $2$ in each iteration, and the latter by a square-root (i.e., from $m$ to $\sqrt{m}$). 
+This will allow us to reduce $m$ and $\ell$ to $\poly(1/\eps)$ and $O(\log(1/\eps)$ respectively, in $O(\log \log n)$ iterations.
+In order to carry the argument, we will introduce a new error term in each application of the pseudo-random restriction. Luckily, the error term itself can be computed by the AND of 3ROBPs with at most $\ell$ colliding layers, which will allow us to fool it as well. In every step, we will show that the probabilities that the error terms equal $1$ remain small, for almost all restrictions.}
+
+%\paragraph{Organization.} In Section~\ref{sec:ell-col-ROBPs}, we state some useful claims about ROBPs with at most $\ell$-colliding layers.  In Section~\ref{sec:negligible}, we show that PRGs fooling ROBPs with all vertices having high probability of reachability is enough to fool ROBPs with at most $\ell$-colliding layers. A similar reduction was used in \cite{CHRT17}, however here we are able to replace the length of the program with the number of colliding layers. In Section~\ref{sec:generator} we present the main details of the analysis of the generator, showing that after each application of the pseudorandom restriction, we can reduce the number of subprograms and the number of non-colliding layers in each subprogram. 
+
+\subsection{Reducing the length of $(3,\ell,m)$-ROBPs}
+
+Here we show that $(3,\ell,m)$-ROBPs can be approximated by $(3,\ell,C^\ell)$-ROBPs for some constant $C$. Another subtle aspect is that we need the approximation to work not just under the uniform distribution but also under the pseudo-random distribution. Fortunately, we are able to do so by arguing that the \emph{error} function detecting when our approximation is wrong is itself computable by a width $3$-ROBP with few colliding layers. 
+
+\begin{lemma}[Main Structural Result]\label{lem:structcolliding}
+For any $c > 0$, there exists  $C \geq 1$ such that the following holds. Any $(3,\ell,m)$-ROBP $B$ can be written as $B' + E$ where $B'$ is a $(3,\ell,C^\ell)$-ROBP and for any $x$, $|E(x)| \leq F(x) = \wedge_{i=1}^{m'} (\neg F_i(x))$ where $F_i$ are $(3,\ell,1)$-ROBPs on disjoint variables with $m' \leq C^\ell$ and $Pr[F(x) = 1] < 2^{-2^{c\ell}}$. 
+\end{lemma}
+
+For any vertex $v$ in a ROBP, we denote by $p_v$ the probability to reach $v$ under a uniform random assignment to the inputs.
+
+\begin{claim}\label{claim:pv-large}
+In a ROBP with width $w$ and at most $\ell$ colliding layers, every vertex whose $p_v>0$ has $p_v \ge 2^{-(\ell+1)\cdot(w-1)}$.
+\end{claim}
+We remark that this bound is exactly tight.
+\begin{proof}
+	We prove by induction (on the length of the program) that any program with width at most $w$,  exactly $\ell$ colliding layers and exactly $t$ reachable states in the last layer, has $p_v \ge 2^{-\ell\cdot(w-1) -(t-1)}$ for any reachable vertex $v$.
+	Without loss of generality all nodes in the program are reachable (otherwise, we remove vertices that aren't reachable).
+	
+	Consider a program $B$ of length $n$ with  parameters $(t, \ell,w)$.
+	Removing the last layer gives a program $B'$ of length $n-1$ with parameters $(t',\ell',w)$. By the induction hypothesis for any $v'$ in the last layer of $B'$ we have $p(v')\ge \delta$ for $\delta := 2^{-\ell'\cdot(w-1) -(t'-1)}$.
+	
+	We perform a case analysis. The following simple bound will be used in all cases. Let $v$ be a vertex in the last layer of $B$. Assume that $e$ edges go into $v$ from vertices in the second to last layer. Then, $p_v \ge \frac{1}{2} \cdot \delta \cdot e$. In particular, since we assumed all vertices are reachable, any vertex in the last layer have $p_v \ge \delta/2$. 
+
+	If $\ell'=\ell$ and $t' = t$, then the last layer of edges in $B$ is regular, i.e., any node in the last layer in $B$ has exactly two ingoing edges. In this case any vertex $v$ in the last layer has  $p_v \ge \frac{1}{2} \cdot \delta\cdot 2= \delta = 2^{-\ell\cdot(w-1) - (t-1)}$.
+	
+	If $\ell'=\ell$, then $t' \le t$, since there are no collisions in the last layer of edges. Since we already handled the case $t'=t$, we may assume $t'\le t-1$.
+	For any vertex $v$ in the last layer we have 
+	$p_v \ge \delta/2 
+	 \ge \frac{1}{2} \cdot 2^{-\ell'(w-1)-(t'-1)}
+	 \ge \frac{1}{2} \cdot 2^{-\ell(w-1)-(t-2)} 
+	 = 2^{-\ell(w-1)-(t-1)}$.
+	
+	If $\ell'<\ell$, then we consider two sub-cases:
+	if $t = 1$ then only one vertex is reachable in the last layer and its $p_v$ equals $1$.
+	Otherwise, $t\ge 2$ and $t'\le w$ thus $t' \le t+(w-2)$ and 
+	 for any  vertex $v$ in the last layer we have  $p_v \ge \delta/2
+	 \ge \frac{1}{2} \cdot 2^{-\ell'(w-1)-(t'-1)}
+	 \ge \frac{1}{2} \cdot 2^{-(\ell-1)(w-1)-(t + (w-2)-1)} 
+	 = 2^{-\ell(w-1)-(t-1)}$.
+\end{proof}
+
+
+\begin{claim}[XOR or colliding]\label{claim:XOR or Colliding}
+Let $B$ be a 3ROBP with width-2 at the start and finish. 
+Let $v_{1,1}$ and $v_{1,2}$ be the two start nodes.
+Then, either $B$ computes the XOR of some of the input bits or there exists a string on which the two paths from $v_{1,1}$ and $v_{1,2}$ collide.
+\end{claim}
+\begin{proof}
+	If $B$ can be computed by a 2ROBP then either this 2ROBP has some collision, or it computes the XOR of some of the input bits. Both cases satisfy the conclusion of the claim.
+		
+	For the rest of the proof assume that $B$ cannot be computed by a 2ROBP.
+	Let $V_1, \ldots, V_{n+1}$ be the layers of vertices in $B$.
+	We say that two states $u,v \in V_i$ are equivalent if the Boolean functions that are computed in the subprograms starting from $u$ and $v$ (resp.) are equal.
+	Without loss of generality, any vertex in $B$ is reachable and there are no two states in $B$ that are equivalent.
+	Let $i$ denote the index of the last layer in $B$ with width $3$.
+	Since $B$ has width-2 at the end, $i<n+1$.
+	
+	There are  six edges between $V_{i}$ and $V_{i+1}$: three edges marked with $x_{i}=0$ and three edges marked with $x_{i}=1$.
+	Since $|V_{i+1}|=2$, by Pigeon-hole principle, there are two edges marked with $x_i = 0$ going to some vertex $v \in V_{i+1}$, and two edges marked with $x_i = 1$ going to some vertex $v'\in V_{i+1}$ ($v'$ is not necessarily different from $v$). 
+	These two pairs of edges cannot be starting from the same two nodes in $V_{i}$ since then the two nodes will be equivalent. 
+	By renaming the nodes in $V_i$, we can assume that the two edges from $v_{i,1}, v_{i,2} \in V_i$ marked with $0$ go to $v\in V_{i+1}$ 
+	and the two edges from $v_{i,2}, v_{i,3}\in V_i$ marked with $1$ go to $v'\in V_{i+1}$. 
+	
+	Since $v_{i,2}$ is reachable, there is an input $(x_1, \ldots, x_{i-1})$ that leads from $v_{1,1}$ or $v_{1,2}$ to $v_{i,2}$.
+	Without loss of generality, we assume that $v_{i,2}$ is reachable from  $v_{1,1}$.
+	Let $v'_i \in V_i$ be the vertex reached by following the input $(x_1, \ldots, x_{i-1})$ starting from the other start vertex $v_{1,2}$.
+	If $v'_i = v_{i,2}$, then we already collided. If $v'_i = v_{i,1}$ then for the choice $x_i = 0$ the two paths defined by $(x_1, \ldots, x_i)$  starting from $v_{1,1}$ and $v_{1,2}$ collide on $v \in V_{i+1}$.
+	Similarly, if $v'_i = v_{i,3}$, then for the choice $x_i = 1$ the two paths collide on $v' \in V_{i+1}$.
+	\end{proof}
+
+
+\begin{claim}[Decomposition]\label{claim:decomposition}
+Let $B = D_1  \circ D_2  \circ \ldots \circ D_m$ be a ROBP where each $D_i$ is a 3ROBP with the first and last state spaces having width at most 2 and at most $\ell$ colliding layers.
+Then, $B$ can be written as $B = D'_{1} \circ \ldots \circ D'_{t}$, for $t\le m$, where each subprogram $D'_{i}$ is a 3ROBP with the first and last state spaces having width at most 2 and at most $\ell$ colliding layers, and each subprogram $D'_i$, except for maybe $D'_1$, has a possible collision.
+\end{claim}
+\begin{proof}
+	Recall that according to Claim~\ref{claim:XOR or Colliding} each $D_i$ is either ``XOR or colliding''.
+	Apply induction on $m$.
+	If $m=1$ we take $D'_1 = D_1$.
+	For $m\ge 2$, 
+	let $D'_1 \circ \ldots \circ D'_t$ be a decomposition for $D_1\circ \ldots \circ D_{m-1}$.
+	We wish to show how to decompose $D_1\circ \ldots \circ D_{m}$.
+	If $D_{m}$ computes an XOR function, then take $D'_{t} := D'_{t} \circ D_{m}$. Note that we haven't introduced any new colliding layers to $D'_t$ thus the decomposition is still valid. Otherwise, $D_{m}$ is a colliding 3ROBP. We set $D'_{t+1} := D_{m}$ and take the decomposition to be $D'_1 \circ \ldots \circ D'_{t+1}$.
+	\end{proof}
+
+\begin{claim}\label{claim:checkcollision}
+Let $B$ be a 3ROBP with width-2 at the start, let $v_{1,1}, v_{1,2}$ be the two start nodes.
+Suppose there are at most $\ell$ colliding layers in $B$. 
+Assume there exists a string on which the two paths from $v_{1,1}$ and $v_{1,2}$ collide.
+Let $u$ be the first vertex on which a collision can occur, and let $E$ be the event that a collision happened on $u$. Then, the event $E$ can be computed by another width-$3$ ROBP with at most $\ell$-colliding layers.
+\end{claim}
+
+\begin{proof}
+To simulate whether the paths starting from $v_{1,1}$ and $v_{1,2}$ collide at $u$, we consider the ROBP that keeps the {\bf unordered} pair corresponding to the states of the two paths during the computation. In each layer until $u$, we have only states corresponding to $\{0,1\}, \{0,2\}$ or $\{1,2\}$. 
+When we reach the layer of $u$ we have two states: ``accept'' (corresponding to a collision on $u$) and ``reject'' (corresponding to anything else).
+Observe that any permutation layer in the original program defines a permutation layer in the new branching program (as a permutation over a finite set also defines a permutation over unordered pairs from this set). Thus, there are at most $\ell$ colliding layers.
+\end{proof}
+
+We are now ready to prove the main structural lemma Lemma~\ref{lem:structcolliding}. In the following, we consider branching programs with two initial nodes $v_{1,1}, v_{1,2}$. We interpret the value of the program on input $x$ as its average value starting for $v_{1,1}$ and $v_{1,2}$. That is, the program can get value $1, 0$ or $-1$ depending on whether the two paths from $v_{1,1}$ and $v_{1,2}$ accept or not.
+
+{\color{red}Throughout this section we think of the error terms as $\{0,1\}$-indicators (instead of the usual $\pmone$-notation for other Boolean functions). We shall use $A \wedge B$ and $\bar{A}$ to denote the standard AND and negation of these Boolean values.
+}
+
+\begin{lemma}\label{lemma:short programs plus error term}
+	Let $B =  D_1 \circ D_2  \circ \ldots \circ D_m $ be a ROBP where each $D_i$ is a 3ROBP with the first and last state spaces having width at most 2.
+	Then, for any $j\in \{2, \ldots m\}$ we can write $B(x)$ as the sum of $(D_j \circ  \ldots \circ D_m)(x)$ and an error term $E(x)$, that is bounded in absolute value by $\bar{\FCol_j(x)} \wedge  \ldots \wedge \bar{\FCol_m(x)}$ where $\FCol_{i}(x)$ denotes the event that the two paths in $D_{i}$ collide on input $x$ at the first vertex on which it is possible to collide in $D_i$.
+\end{lemma}
+\begin{proof}
+For $j=2, \ldots, m$, let $v_{j,1}$ and $v_{j,2}$ be the two nodes at the first layer of the subprogram $D_j$.
+If $D_1$ has two nodes at the first layer, then denote them by $v_{1,1}$ and $v_{1,2}$, otherwise denote the single node by $v_{1,1}$. 
+Let $x$ be an input to the branching program $B$.
+Let $v^{*}_j \in \{v_{j,1}, v_{j,2}\}$ be the vertex in the path defined by $x$ from $v_{1,1}$ right after the end of $D_1 \circ \ldots \circ D_{j-1}$.
+Let $v'_j$ be the other vertex in the layer of $v^{*}_j$.
+If the two paths defined by $x$ from $v^{*}_j$ and $v'_j$ collide at some point, then the value of $B(x)$ equals the value of $(D_j \circ \ldots \circ D_m)(x)$.
+If the two paths do not collide, then $(D_j \circ \ldots \circ D_m)(x) = 0$, since it is the average of two paths with different outcomes, thus $E(x)= B(x) - (D_j \circ \ldots \circ D_m)(x)$ is at most $1$ in absolute value. 
+Furthermore, in such a case, for all $i = j, \ldots, m$ it holds that both paths in the subprogram $D_i$ starting from $v_{i,1}$ and $v_{i,2}$ on input $x$ do not collide, i.e., $\FCol_i(x) = 0$.
+Overall, we got that $B(x) = E(x) + (D_j \circ \ldots \circ D_m)(x)$, and whenever $E(x)\neq 0$, it holds that $\bar{\FCol_j(x)} \wedge  \ldots \wedge \bar{\FCol_m(x)} =1$.
+\end{proof}
+
+\begin{proof}[Proof of Lemma~\ref{lem:structcolliding}]
+Fix a constant $C$ to be chosen later. Let $B$ be a $(3,\ell,m)$-ROBP. Let $B = D_1' \circ D_2' \circ \cdots D_t'$ for $t \leq m$ be the decomposition as guaranteed by Claim~\ref{claim:decomposition}. If $t \leq C^\ell$, there is nothing to prove. Suppose that $t > C^\ell$. Let $j = t - C^\ell > 1$. Let $B' = D_j' \circ D_{j+1}' \circ \cdots \circ D_t'$ and let $F(x) = \bar{\FCol_j(x)} \wedge  \ldots \wedge \bar{\FCol_m(x)}$ where $\FCol_{i}(x)$ denotes the event that the two paths in $D_{i}'$ collide on input $x$ at the first vertex on which it is possible to collide in $D_i'$. Then, by the previous claim, we can write $B = B' + E$ where for any input $x$, $|E(x)| \leq F(x)$. We will argue that this gives the desired decomposition. 
+
+Fix $i \in \{j, j+1,\ldots, t\}$. By Claim~\ref{claim:checkcollision} $\FCol_i(x)$ is a $(3,\ell,1)$-ROBP. Further, as each $D_i'$ has a possible collision, each $\FCol_{i}$ has an accepting input. Since $\FCol_i$ is also a $(3,\ell,1)$-ROBP, by Claim~\ref{claim:pv-large}, for a uniformly random $x$ we get $\Pr[\FCol_{i}(x) = 1] \geq 2^{-2(\ell+1)}$. Therefore,
+\begin{align*}
+\Pr[F(x) = 1] = \prod_{i=j}^{t} (1 - \Pr[\FCol_i(x) = 1]) \leq (1 - 2^{-2(\ell+1)})^{C^\ell} \leq 2^{-2^{c\ell}}
+\end{align*}
+for $C = 8 \cdot 2^c$. This proves the claim. 
+\end{proof}
+
+\subsection{PRGs for ROBPs with few colliding layers}
+In this section we show that we can $\epsilon$-fool PRGs with at most $\ell$-colliding layers with $\tilde{O}((\log(\ell/\epsilon)) (\log n))$ seed-length. 
+
+\begin{theorem}\label{thm:foolfewcollisions}
+For any $\epsilon > 0$, there is an explicit PRG that $\eps$-fools ordered width $w$-ROBPs with length $n$ and at most $\ell$ colliding layers using seed length
+$$O((\log \log n + \log(1/\eps) + \log(\ell) + w) \log n.$$
+\end{theorem}
+
+The above relies on the PRGs for regular branching programs and generalizations of them due to Braverman, Rao, Raz, and Yehudayoff \cite{BravermanRRY10}. In the following, we call a read-once branching program $B$ an $(n,w,\delta)$-ROBP if $B$ is of length-$n$, width-$w$ and for all reachable vertices $v$ in $B$ we have $p_v(B) \ge \delta$ where  $$p_v(B):= \Pr_{x \sim U_n}[\text{reaching $v$ on the walk on $B$ defined by $x$}].$$
+
+We start by quoting a result by Braverman et al. \cite{BravermanRRY10}.
+
+\begin{theorem}[\cite{BravermanRRY10}]\label{thm:BRRY}
+There is an explicit PRG that  $\eps$-fools all $(n,w,\delta)$-ROBPs, using seed length
+$$O(\log \log n + \log(1/\eps) + \log(1/\delta) + \log(w)) \cdot \log n.$$
+\end{theorem}
+
+Next, we reduce the task of fooling ROBPs with at most $\ell$-colliding layers to the task of fooling ROBPs with no negligible vertices.
+The reduction is similar to that in \cite{CHRT17}. The main difference is that we simulate a ROBP with width $w$ by a ROBP of width $w+1$ that has no negligible vertices by adding a new sink state that should be thought of as ``immediate reject''. 
+This change seems essential in our case, and the reduction from \cite{CHRT17} does not seem to satisfy the necessary properties here.
+
+
+
+\begin{lemma}\label{lemma:negligible}
+Let $\delta \le 2^{-(w-1)}$.
+Let $\D$ be a distribution on $\pmone^n$ that $\eps$-fools all $(n,w+1,\delta)$-ROBPs.
+Then, $\D$ also fools width-$w$ ROBPs with at most $\ell$ colliding layers with error at most $(\ell w +1)\cdot \eps +  (2^{w} w \ell) \cdot \delta$.
+\end{lemma}
+\begin{proof}
+	Let $\D$ be a distribution on $\pmone^n$ that $\eps$-fools all $(n,w+1,\delta)$-ROBPs.
+The first observation is that any distribution $\D$ that fools all $(n,w+1,\delta)$-ROBPs also fools prefixes of these programs. The reason is simple because to simulate the prefix of length-$k$ of a $(n,w+1,\delta)$-program $B$, one can simply reroute the last $n-k$ layers of edges in $B$ so that they would ``do nothing'', i.e. that they would be the identity transformation regardless of the values of $x_{k+1}, \ldots, x_n$.
+
+Let $B$ be a length $n$ width-$w$ ROBP with at most $\ell$ colliding layers.
+Next, we introduce $B'$, an $(n,w+1,\delta)$-ROBP, that would help bound the difference between 
+$$
+B(U_n) := \Pr_{x\sim U_n} [B(x)=1] \quad\text{and}\quad 
+B(\D) := \Pr_{x\sim \D} [B(x)=1]\;,
+$$ 
+where $U_n$ is the uniform distribution over $\pmone^n$.
+Let $B'$ be the the following modified version of $B$.
+To construct $B'$ we consider a sequence of $\ell+1$ branching programs $B_0, \ldots, B_\ell$ where $B_0 = B$ and $B' = B_\ell$.
+We initiate $B_0$ with $B$.
+For $i=1, \ldots, n$ we take $B_i$ to be $B_{i-1}$ except we may reroute some of the edges in the $i$-th layer (of edges).
+We explain the rerouting procedure. Let $i_1, \ldots, i_\ell$ be the colliding layers in $B$.
+For $j=1,\ldots, \ell$ we calculate the probability to reach vertices in layer $V_{i_j}$ of $B_{j-1}$. If some vertex $v$ in the $i_j$-th layer has probability less than $2^{w-1} \cdot \delta$, then we reroute the two edges going from the vertex $v$ to go to ``immediate reject''. We denote by $\Vsmall$ the set of vertices for which we rerouted the outgoing edges from them.
+
+First, we claim that any reachable vertex $v$ in $B_\ell$ has $p_v  \ge \delta$. 
+Let $i_{\ell+1} = n+1$ for convenience. 
+We apply induction and show that for $j=0,1, \ldots, \ell$ any vertex reachable by $B_{j}$ in layers $1,\ldots, i_{j+1}$ has $p_v \ge \delta$.
+The base case holds because up to layer $i_{1}$ the branching program has no colliding layers and we may apply Claim~\ref{claim:pv-large} to get that $p_v \ge 2^{-(w-1)} \ge \delta$.
+%This obviously hold for the starting vertex in $B_0$ which has $p_v = 1$.
+To apply induction assume the claim holds for $B_{j-1}$ and show that it holds for $B_{j}$.
+The claim obviously holds for all vertices in layers $1, \ldots, i_{j}$ in $B_j$ since we didn't change any edge in those layers going from  $B_{j-1}$ to $B_j$.
+
+Let $v$ be a reachable vertex in layer $i$ where $i_j < i \le i_{j+1}$ in $B_j$. It means that there is a vertex in $v'$ with $p(v') \ge 2^{w-1}\cdot \delta$ in the $i_{j}$-th layer of $B_j$ (and also in $B_{j-1}$) and a path going from $v'$ to $v$. 
+Looking at the subprogram from $v'$ to $v$ we note that this is a subprogram with no colliding edges (only the first layer has the potential to be colliding, but in a ROBP the first layer can never be colliding has there is only one $0$-edge and only one $1$-edge). By Claim~\ref{claim:pv-large} the probability to get from $v'$ to $v$ is at least $2^{-(w-1)}$.
+Thus, the probability to reach $v$ is at least $p(v') \cdot \Pr[\text{reach $v$}|\text{reached $v'$}] \ge 2^{w-1} \cdot \delta \cdot 2^{-(w-1)} = \delta$.
+
+To bound $|B(U_n)-B(\D)|$ we use the triangle inequality:
+\begin{equation}\label{eq:hybrid}|B(U_n)-B(\D)|  \le |B(U_n)-B'(U_n)| + |B'(U_n)-B'(\D)| + |B'(\D)-B(\D)|\end{equation}
+and bound each of the three terms separately:
+\begin{enumerate}
+\item	
+The first term is bounded by the probability of reaching one of the nodes in $\Vsmall$ in $B'$ when taking a uniform random walk. This follows since if the path defined by $x$ didn't pass through $\Vsmall$ then we would end up with the same node in both $B$ and $B'$ (since no rerouting affected the path).
+By union bound, the probability to pass through $\Vsmall$ is at most $|\Vsmall| \cdot 2^{w-1} \cdot \delta$.
+\item The second term is at most $\eps$ since the program $B'$ has all $p_v \ge \delta$.
+\item Similarly to the first term, the third term is bounded by the probability of reaching one of the nodes in $\Vsmall$ in $B'$ when taking a walk sampled by $\D$.
+	\begin{align*}
+		|B'(\D) - B(\D)|
+		&\le \Pr_{x\sim \D}[\text{reaching $\Vsmall$ on the walk on $B'$ defined by $x$}] \\
+		&\le \sum_{v\in \Vsmall} \Pr_{x\sim \D}[\text{reaching $v$ on the walk on $B'$ defined by $x$}]
+	\end{align*}
+	However since $\D$ is pseudorandom for prefixes of $B'$, for each $v \in \Vsmall$ the probability of reaching $v$ when walking according to $\D$ is  $\eps$-close to the probability of reaching $v$ when walking according to $U_n$.
+	\begin{align*}
+		|B'(\D) - B(\D)|
+		&\le \sum_{v\in \Vsmall} \Pr_{x\sim U_n}[\text{reaching $v$ on the walk on $B'$ defined by $x$}] + \eps\\
+		&= \sum_{v\in \Vsmall} \left(p_v(B') + \eps\right)
+		\le |\Vsmall| \cdot (\eps + 2^{w-1} \delta)
+	\end{align*}
+\end{enumerate}
+
+Summing the upper bound on the three terms in Eq.~\eqref{eq:hybrid} gives:
+\[|B(U_n)-B(\D)| \le |\Vsmall|\cdot (\eps +  2^{w} \delta) + \eps  \le \ell w \cdot (\eps +  2^{w} \delta) + \eps.\;\qedhere\]
+\end{proof}
+
+
+\begin{proof}[Proof of Theorem~\ref{thm:foolfewcollisions}]
+	Take the BRRY-generator. %(which is the INW-generator).
+	Take $\eps' = \eps/(2(\ell w+1))$ and $\delta = \eps'/2^{w}$. 
+	Apply Lemma~\ref{lemma:negligible} and Theorem~\ref{thm:BRRY} with $\delta$ and $\eps'$.
+	Then, the error of the generator guaranteed by Theorem~\ref{thm:BRRY}  on the class of ROBPs with width $w$ length $n$ and at most $\ell$ colliding layers is at most 
+	$(\ell w+1) \cdot \eps' + (2^{w} \cdot w\cdot \ell) \cdot \delta \le \eps/2 + \eps/2 = \eps$, 
+	and the seed length is 
+	$$O(\log \log n + \log(1/\eps') + \log(1/\delta) + \log(w)) \cdot \log(n)$$
+	which is at most $O(\log \log n + \log(1/\eps) + \log(\ell) + w)\cdot \log(n)$.
+	\end{proof}
+	
+\subsection{Proof of Theorem~\ref{thm:main-3ROBP-ordered}}
+We are now ready to prove our main result on fooling width 3 ROBPs. Our generator is obtained by applying Claim~\ref{claim:assigning} iteratively for $O(\log \log n)$ times and then using a PRG for fooling width 3 ROBPs with at most $O(\log(n/\epsilon))$ colliding layers as in Theorem~\ref{thm:foolfewcollisions}. The intuition is as follows. 
+
+Let $B$ be a 3ROBP and let $\rho_0$ be a pseudorandom assignment as in Claim~\ref{claim:assigning}. We first show that with probability at least $1-\epsilon/n$ over $\rho_0$,  $B^0 = B|_{\rho_0}$ is a $(3,\ell_0,m)$-ROBP for $\ell_0 = O(\log(n/\epsilon))$. Let $B^0 = D_1^0 \circ D_2^0 \circ \cdots \circ D_m^0$ where each $D_i^0$ has at most $\ell_0$ colliding layers and begins and ends with width two layers. Let $\rho_1$ be an independent pseudo-random assignment as in Claim~\ref{claim:assigning}. Then $B^1 \equiv B^0|_{\rho_1} = D_1^0|_{\rho_1} \circ D_2^0|_{\rho_2} \cdots \circ D_m^0|_{\rho_1}$ and it is easy to check that with probability at least $\epsilon + 2^{-O(\ell)}$, each $D_i^0|_{\rho_1}$ has at most $\ell_0/2$ colliding layers. Ideally, we would like to apply a union bound over the different $D_i^0$ and conclude that $B^1$ is a $(3,\ell_0/2,m)$-ROBP. However, $m$ could be much larger than $C^\ell$ to use this approach. Thus, by a union bound if $m \leq C^\ell$ for a constant, then choosing $\rho_1$ with appropriate parameters gives us that with probability at least $1 - 2^{-O(\ell)}$, $B^1$ is a $(3,\ell_0/2,m')$-ROBP. However, $m$ could be much larger than $C^\ell$ to begin with. Nevertheless, we know that we can always approximate $B^0$ with a $(3,\ell_0,C^\ell)$-ROBP by Lemma~\ref{lem:structcolliding}. This approximation allows us to apply the union bound and conclude that the number of colliding layers in each block decreases by a factor of $2$. We iterate this approach until the number of colliding layers is $O(\log \log n)$ when we use the PRG from Theorem~\ref{thm:foolfewcollisions}.
+
+To carry the induction forward as outlined above, we need the following technical lemma. 
+
+\begin{claim}\label{claim:simplifyerror}
+For all constants $c,C$, there exists $\alpha \in (0,1)$ such that the following holds. Let $\ell \leq \log(n/\epsilon)$, and let $F(x) = \wedge_{i=1}^m (\neg F_i(x))$ where $F_i$ are $(3,\ell,1)$-ROBPs on disjoint variables with $m \leq C^\ell$ and $Pr[F(x) = 1] < 2^{-2^{c \ell}}$. Then, for a sufficiently small constant parameter $\alpha$, and $\rho$ a pseudorandom assignment as in Claim~\ref{claim:assigning}, with probability at least $1 - O(\alpha)^{\ell}$, we can write $F_\rho(x) = \wedge_{i=1}^{m'} (\neg F_i'(x))$ where $F_i'$ are $(3,\ell/2,1)$-ROBPs on disjoint variables with $m' \leq C^{\ell/2}$ and $Pr[F(x) = 1] < 2^{-2^{c \ell/2}} + n^2 \epsilon$. 
+\end{claim} 
+\begin{proof}
+\Rnote{Almost done. Need to fix this proof. We could also move this to the appendix.}
+
+	First, we show that with high probability, each $\FCol_i$ has at most $\ell/2$ colliding layers under the pseudo-random restriction. 
+	To see it, note that any colliding layer that is restricted can be either:
+	\begin{itemize}
+		\item assigned to a value that reduces the width of the original program to $2$, and thus the width of $\FCol_i$ to 1, in which case every previous layer in $\FCol_i$ is not affecting the value of $\FCol_i$.
+		\item assigned to a value that applies a permutation on the states of the program, thus reducing the number of colliding layers.
+	\end{itemize}  
+	In either cases, if $k$ colliding layers are unassigned, then $\FCol_i|_{\rho}$ can be a computed by a 3ROBP with at most $k$ colliding layers.
+	%Since the selection is done using a $\poly(\eps/n)$-biased distribution, 
+	By Claim~\ref{claim:assigning} the probability that less than $\ell/2$ colliding layers are unassigned is at least $1-40^{-\ell}$.
+	Taking a union bound over the $20^{\ell}$ functions $\{\FCol_i\}_{i=1}^{m}$ we get that with probability at least $1-2^{-\ell}$ all functions $\{\FCol_i|_{\rho}\}_{i=1}^{m}$ can be computed by 3ROBPs with have at most $\ell/2$ colliding layers.
+	
+	We move to show that with high probability at least $\sqrt{m}$ of the functions $\FCol_i|_{\rho}$ are non-zero.
+	We apply the second moment method. 
+	Denote by $p_i = \Pr_{z\sim U}[\FCol_i(z)]$ for $i=1, \ldots, m$.
+	Let $A_1, \ldots, A_m$ be the events that $\{(\FCol_i)|_{\rho}(y) =1\}_{i=1}^{m}$ respectively, where $\rho$ is the pseudo-random restriction from Claim~\ref{claim:assigning} and $y \sim U_{\rho^{-1}(*)}$.
+	By Claim~\ref{claim:assigning}
+	$$\Pr[A_i] = \Pr_{\rho,y}[(\FCol_i)|_{\rho}(y) =1] = \E_{z\sim U}[\FCol_i(z)] \pm \poly(\eps/n) = p_i \pm \poly(\eps/n),$$
+	and by the next lemma, whose proof is deferred to Appendix~\ref{app:composition 3ROBPs}, we get
+	\begin{align*}\Pr[A_i \wedge A_j] &= \Pr_{\rho,y}[(\FCol_i)|_{\rho}(y) \wedge (\FCol_j)|_{\rho}(y) =1]\\
+	&= \E_{z\sim U}[\FCol_i(z)\wedge \FCol_j(z)] \pm \poly(\eps/n) = p_i p_j \pm \poly(\eps/n).
+	\end{align*}	
+
+\begin{lemma}\label{lemma:fooling H of width-3}
+Let $f_1, \ldots, f_k$ be 3ROBPs on disjoint sets of variables of $[n]$. 
+Let $H:\pmone^k \to \pmone$ be any Boolean function.
+Then, $f = H(f_1, f_2, \ldots, f_k)$ is $\eps\cdot ((n+k)/k)^k$-fooled by the pseudorandom partial assignment in Claim~\ref{claim:assigning}.
+\end{lemma}
+	Thus, the covariance of the two events is at most $\eps' := \poly(\eps/n)$.	
+	We get that the probability that at most $\sum_{i}{p_i/2}$ of the events $A_1, \ldots, A_m$ occur is at most 
+	$(\sum_{i=1}^{m} {p_i} + \eps' m^2)/(\sum_{i=1}^{m}p_i/2 - \eps' m)^2 \le O(1/\sum_{i=1}^{m}p_i) \le 2^{-2\ell}$.
+	In the complement event, at least $\sum_{i}{p_i/2}$ of the events $A_1, \ldots, A_m$ occur, and in particular at least $\sum_{i}{p_i/2} \ge m \cdot 2^{-2(\ell+1)-1} \ge 20^{\ell/2}$ (using $\ell \ge 24$) of the restricted functions $\{\FCol_i|_\rho\}_{i=1}^m$ are non-zero. 
+
+Suppose that at least $20^{\ell/2}$ of the restricted functions $\{\FCol_i|_\rho\}_{i=1}^m$ are non-zero, and that all restricted functions has at most $\ell/2$ colliding layers. By the above analysis this happens with probability at least $1-2\cdot 2^{-\ell}$. Under this assumption, we can reduce the number of functions to be exactly $\sqrt{m} = 20^{\ell/2}$, resulting in an upper bound on $E|_{\rho}$ which we denote by $\mE(x) \triangleq \bar{\FCol'_{1}(x)} \wedge \ldots \wedge \bar{\FCol'_{\sqrt{m}}(x)} $.
+%It remains to show that the probability that $\mE(x)=1$ is exponentially small in $\ell$. Indeed, using  Claim~\ref{claim:pv-large}, $\mE(x)=1$ with probability at most $(1-2^{-2(\ell/2+1)})^{20^{\ell/2}} \ll 2^{-\ell}$.
+%
+%	It remains to show that we can reduce the number of  functions in case there are more than $20^{\ell/2}$ functions that are non-zero after the restriction without increasing the error by too much.
+%	We simply note that whenever more than $20^{\ell/2}$ functions remained non-zero we can simply take a subset of $20^{\ell/2}$ non-zero of them. In this case the probability of $\vee_{i} (\FCol_i)|_{\rho}(y) =1$ is still greater than $1-(1-2^{-2(\ell/2+1)})^{20^{\ell/2}} \gg 1-2^{-\ell}$ using Claim~\ref{claim:pv-large}. 
+%	Thus, the error probability remains exponentially small in $\ell$.
+	\end{proof}
+
+We are now ready to prove the main Theorem of this section, Theorem~\ref{thm:main-3ROBP-ordered}.
+\begin{proof}[Proof of Theorem~\ref{thm:main-3ROBP-ordered}]
+Fix a constant $c \geq 1$, and let $C$ be the constant from Lemma~\ref{lem:structcolliding} applied to $c$. Let $\alpha \in (0,1)$ be a constant to be chosen later. Let $\ell_0 = \lceil\log_2 (n/\epsilon) \rceil$. Let $k$ be a parameter to be chosen later and let $\ell_i = \ell_0/2^i$ for $1 \leq i \leq k$. 
+
+Our generator is as follows. First choose $\rho_0, \rho_1,\ldots,\rho_k$ independent pseudo-random restrictions as in Claim~\ref{claim:assigning} with parameter $\alpha$. After iteratively applying the restrictions $\rho_0,\rho_1,\ldots,\rho_k$, we set the remaining bits using the generator from Theorem~\ref{thm:foolfewcollisions} for a parameter $\ell = \ell_k \cdot C^{\ell_k}$ and error parameter $\epsilon'$ to be chosen later. Let $Y$ be the output distribution of the generator. 
+
+Let $B^0 = B|_{\rho_0}$. We first claim that $B^0$ is a $(3,\ell_0,m)$-ROBP with high probability. In the following, let $bias(f)$ denote the expectation of a function $f$ under a uniformly random input. In the following let $X$ be uniformly random over $\{0,1\}^n$. 
+\begin{claim}\label{claim:main1}
+With probability at least $1-\epsilon/n$, $B|_{\rho_0}$ is a $(3,\ell_0,m)$-ROBP and $E_{\rho_0,X}[B|_{\rho_0}(X)] = E_X[B(X)] \pm \epsilon/n$. 
+\end{claim}
+
+For $0 \leq i \leq k$, let $\rho^i = \rho_0 \circ \cdots \rho_i$. We will show the following claim by induction on $i$.
+\begin{claim}\label{claim:main2}
+For $0 \leq i \leq k$, with probability at least $1- (i+1) 2^{-c \ell_i}$, $B|_{\rho^i}$ can be written as $B^i + E^0 + E^1 + \cdots + E^i$ where $B^i$ is a $(3,\ell_i,C^{\ell_i})$-ROBP and the error terms $E^j$ for $0 \leq j \leq i$ satisfy:
+\begin{enumerate}
+\item $|E^j(x)| \leq F^j(x)$ with $F^j(x) = \wedge_{h=1}^{m_j} (\neg F_h^j(x))$ where $F_h^i$ are $(3,\ell_i,1)$-ROBPs on disjoint sets of variables and $m_j \leq C^{\ell_i}$. 
+\item $Pr[F^j(x) = 1] \leq 2^{-2^{c\ell_i}} + n^2 i \epsilon$.
+\end{enumerate}
+
+Furthermore, $E_{\rho^i,X}[B|_{\rho^i}(X)] = E_X[B(X)] \pm (i+1) \epsilon/n$. 
+\end{claim}
+
+A crucial point in the above is that the functions $F^0,\ldots,F^i$ bounding the error terms are a conjunctions of negations of $(3,\ell_i,C^{\ell_i})$-ROBPs and there are at most $C^{\ell_i}$ in each of them. 
+\begin{proof}
+For $i= 0$, the claim follows immediately by applying Lemma~\ref{lem:structcolliding} to $B|_{\rho_0}$. Now, suppose the claim is true for $i$. Suppose, we can write $B|_{\rho^i} = B^i + {\cal E}^i$, where ${\cal E}^i = E^0 + E^1 + \cdots + E^i$ as in the claim. By the induction hypothesis, this happens with probability at least $1 - i \cdot 2^{-c \ell_i}$. 
+
+Clearly, $B|_{\rho^{i+1}} = B^i_{\rho_{i+1}} + {\cal{E}}^i|_{\rho_{i+1}}$. Let $B^i = D_0 \circ D_1 \circ \cdots \circ D_{m'}$ be a decomposition where each $D_j$ has at most $\ell_i$ colliding layers, starts and ends with width two layers and $m' \leq C^{\ell_i}$.  
+
+Now, observe that as each $D_0$ has at most $\ell_i$ colliding layers, the probability that at least $\ell_i/2$ of these colliding layers are unfixed under $\rho_{i+1}$ is at most $ 2^{\ell_i} \alpha^{\ell_i/2}$ by Claim~\ref{claim:assigning}. Thus, by a union bound over $0 \leq j \leq m'$, with probability at least $1 - 2^{\ell_i} \alpha^{\ell_i/2} \cdot C^{\ell_i}$, over $\rho^{i+1}$, $B^i_{\rho_{i+1}}$ is a $(3,\ell_i/2,C^{\ell_i})$-ROBP.  Now, conditioning on this event, by Lemma~\ref{lem:structcolliding}, we can write $B^i_{\rho_{i+1}}$ as $B^{i+1} + E^{i+1}$, where $B^{i+1}$ is a $(3,\ell_{i+1}, C^{\ell_{i+1}})$-ROBP and $E^{i+1}$ satisfies the conditions of the claim. Thus, with probability at least $1 - i \cdot 2^{-c \ell_i} - 2^{-c \ell_{i+1}} \geq 1 - (i+1) 2^{-c \ell_{i+1}}$, 
+\begin{align*}
+B|_{\rho^{i+1}} &= B^i|_{\rho_{i+1}} + {\cal E}^i|_{\rho_{i+1}} \\
+&= B^{i+1} + {\cal E}^i|_{\rho_{i+1}} + E^{i+1},
+\end{align*}
+where $B^{i+1}$, and $E^{i+1}$ satisfy the conditions of the claim. 
+
+We just need to argue that ${\cal E}^i|_{\rho_{i+1}}$ can be written in the requisite form. To this end, note that for $0 \leq j \leq i$, $|E^j|_{\rho_{i+1}}| \leq F^j|_{\rho_{i+1}}$. By the induction hypothesis, we can write $F^j = \wedge_{h=1}^{m_j} (\neg F_h^j(x))$ where $F_h^i$ are $(3,\ell_i,1)$-ROBPs on disjoint sets of variables and $m_j \leq C^{\ell_i}$. We can now apply Claim~\ref{claim:simplifyerror} to conclude that with probability at least $1 - O(\alpha)^{\ell_j}$, we can write $F^j|_{\rho_{i+1}} = \wedge_{h=1}^{m_j'} (\neg H_h^j(x))$ where $H_h^j$ are $(3,\ell_i/2,1)$-ROBPs on disjoint sets of variables and $m_j' \leq C^{\ell_i/2}$. This satisfies the constraints of the claim. 
+
+Adding up the failure probabilities over the choice of $\rho_{i+1}$, we get the desired decomposition for $i+1$ with probability at least 
+
+$$1 - 2^{\ell_i} \alpha^{\ell_i/2} \cdot C^{\ell_i} - \sum_{j=0}^i O(\alpha)^{\ell_j} \geq 1 - 2^{-c \ell_j},$$
+for $\alpha$ a sufficiently small constant. 
+
+
+The furthermore part follows immediately from Claim~\ref{claim:assigning}. The claim now follows by induction. 
+\end{proof}
+
+We are now ready to prove the theorem. By the above claim, we have that with probability at least $1 - (k+1) 2^{-c \ell_k}$ over the choice of $\rho_0, \rho_1,\ldots,\rho_k$, we can write
+$$B|_{\rho^k} = B^k + E^0 + \cdots + E^k,$$
+where $B^k$ is a $(3, \ell_k,C^{\ell_k})$-ROBP and $E^0,\ldots,E^k$ can be bounded by functions $F^0,\ldots,F^k$ as a conjunction of negations of $C^{\ell_k}$ $(3,\ell_k,1)$-ROBPs. 
+
+Note that each such $F^j$ can be written as a width $4$ ROBP, say $H^j$, by adding an additional layer to compute the conjunction and that the number of collisions in the width $4$ ROBP is at most $\ell_k \cdot C^{\ell_k}$. Therefore, if we let $Y$ be the output distribution of the generator from Theorem~\ref{thm:foolfewcollisions} with $\ell = \ell_k \cdot C^{\ell_k}$ and error parameter $\epsilon'$, we get that for all $0 \leq j \leq k$, and $X$ uniformly random over $\{0,1\}^n$, 
+\begin{align*}
+E[B^k(X)] &= E[B^k(Y)] \pm \epsilon'\\
+E[|E^j(Y)|] &\leq E[H^j(Y)] \leq E[H^j(X)] + \epsilon' \leq 2^{-2^{-c\ell_k}} + n^2 k \epsilon + \epsilon'.
+\end{align*}
+
+Combining the above inequalities we get that with probability at least $1 - (k+1) 2^{-c \ell_k}$ over the choice of $\rho_0, \rho_1,\ldots,\rho_k$
+$$E_X [B|_{\rho^k}(X)] = E_Y [B|_{\rho^k}(Y)] + \epsilon' + k(2^{-2^{-c\ell_k}} + n^2 k \epsilon + \epsilon').$$
+Finally, as we also have that 
+$$E_{\rho_0,\ldots,\rho_k}[ B|_{\rho^k}(X)] = E[B(X)] \pm (k+1) \cdot \epsilon/n,$$
+we get
+$$E_{\rho_0,\ldots,\rho_k}[B|_{\rho^k}(Y)] = E[B(X)] \pm \left( (k+1) \cdot \epsilon/n + (k+1) 2^{-c \ell_k} + \epsilon' + k(2^{-2^{-c\ell_k}} + n^2 k \epsilon + \epsilon')\right).$$
+
+Note that if we set $k = \log(\ell_0/(\log(1/\delta))) = O(\log \log n)$, so that $\ell_k = \ell_0/2^k = \log(1/\delta)$, $\epsilon = \delta/n^3$ and $\epsilon' = \delta/k$, the above error bound becomes
+$$E_{\rho_0,\ldots,\rho_k}[B|_{\rho^k}(Y)] = E[B(X)] \pm O(\log \log n) \delta^2 E[B(X)] \pm O(\delta).$$
+
+Finally, we estimate the seed-length of our generator. Choosing the random restrictions takes $\tilde{O}(\log(n/\epsilon)) = \tilde{O}(\log(n/\delta))$ random bits. Sampling $Y$ as per Theorem~\ref{thm:foolfewcollisions} needs seed-length
+$$O(((\log \log n) + \log(1/\epsilon') + \log(L))(\log n)) = O((\log \log n) + \log(1/\delta)) \cdot (\log n).$$
+
+Thus, the final seed-length is $\tilde{O}(\log(n/\delta)) + O(\log(1/\delta) (\log n))$. The theorem follows. 
+\end{proof}
+
+\ignore{
+\subsection{The Generator}\label{sec:generator}
+
+In this section, we present the generator and its analysis.
+Throughout the section, we deal with ROBPs of the form
+$D_1 \circ D_2  \circ \ldots \circ D_m$ where each $D_i$ is a 3ROBP with the first and last state spaces having width at most 2, and each $D_i$ has at most $\ell$ colliding layers. 
+The next lemma shows that we can approximate any such ROBP by a shorter ROBP plus an error term, which  in itself can be computed by the AND of 3ROBPs with at most $\ell$ colliding layers.
+
+
+
+
+The next lemma shows that in ROBPs composed of smaller subprograms with at most $\ell$ non-permuting layers, the maximal number of non-permuting layers decrease from  $\ell$ to  $\ell	/2$ under the pseudo-random restriction from Claim~\ref{claim:assigning} with high probability.
+
+\begin{lemma}\label{lemma:ell reduces}
+	Let $\ell \le 10\log(n/\eps)$.
+	Let $B = D_1 \circ D_2 \circ \ldots \circ D_m$ be a ROBP where each $D_i$ is a 3ROBP with the first and last state spaces having width at most 2, and at most $\ell$ colliding layers.
+	Suppose $m \le 20^{\ell}$.
+	Let $\rho$ be the pseudo-random restriction from Claim~\ref{claim:assigning}.
+	Then, with probability at least $1-2^{-\ell}$ the restricted ROBP $B|_{\rho}$ can be written as $D'_{1} \circ \ldots \circ D'_{m'}$  where each $D'_i$ is a 3ROBP with the first and last state spaces having width at most 2, and at most $\ell/2$ colliding layers.
+\end{lemma}
+
+\begin{proof}
+	It suffices to show that with high probability under the pseudo-random restriction, each $D_i$ can be written as $D'_{i,1} \circ \ldots \circ D'_{i,r_i}$ where each $D'_{i,j}$ is a 3ROBP with the first and last state spaces having width at most 2, and at most $\ell/2$ colliding layers.
+To see it, note that any colliding layer that is restricted can be either:
+	\begin{itemize}
+		\item assigned a value that reduces the width to $2$, breaking the subprogram $D_i$ into two subprograms. This step can make the layer before the current layer become colliding, but all other non-colliding layers remain non-colliding.
+		\item assigned a value that applies a permutation on the states of the program, thus reducing the number of colliding layers.
+	\end{itemize} 
+		In either cases, if less than $\ell/2$ colliding layers are unassigned, then $D_i$ can be written as $D'_{i,1} \circ \ldots \circ D'_{i,r_i}$ with each $D'_{i,j}$ having at most $\ell/2$ colliding layers.
+	By Claim~\ref{claim:assigning}, the probability that less than $\ell/2$ colliding layers are unassigned is at least $1-40^{-\ell}$.
+
+%	In either cases, if among every consecutive $\ell/2$ colliding layers, at least one is assigned under the pseudo-random restriction, then $D_i$ can be written as $D'_{i,1} \circ \ldots \circ D'_{i,r_i}$ with each $D'_{i,j}$ having at most $\ell/2$ colliding layers.
+%	Claim~\ref{claim:assigning} guarantees that the probability that any set of $\ell/2$ bits are unassigned is at most $0.0002^{\ell}$.
+%	 Thus, with probability at most $40^{-\ell}$, there are $\ell/2$ consecutive colliding layers that are unassigned by the pseudo-random restriction.
+	
+	Taking a union bound over all $m\le 20^{\ell}$ subprograms $D_i$, shows that with probability at least $1-2^{-\ell}$, the restricted function can be computed by 
+	$D'_{1,1} \circ \ldots \circ D'_{1,r_1} \circ \ldots \circ D'_{m,1} \circ \ldots \circ D'_{m,r_m}$ 
+	where each $D'_{i,j}$ having at most $\ell/2$ colliding layers.
+\end{proof}
+
+
+The next lemma shows that the error term simplifies under a pseudo-random restriction, while maintaining a small probability of acceptance.
+
+\begin{lemma}\label{lemma:error under restriction}
+Let $\ell \ge 24$.
+	Let $m= 20^{\ell}$. Let $E = \bar{\FCol_1} \wedge \ldots \wedge \bar{\FCol_m}$ where each $\FCol_i$ is a non-zero unordered-pairs-3ROBP with at most $\ell$ colliding layers.
+	Let $\rho$ be the pseudo-random restriction that keeps each variable alive with probability at most $0.0001$ from 
+	Claim~\ref{claim:assigning}.
+	Then, with probability at least $1-2\cdot 2^{-\ell}$ the restricted function $E|_{\rho}(x)$ can be upper bounded by 
+	$\mE(x) \triangleq \bar{\FCol'_{1}(x)} \wedge\ldots \wedge \bar{\FCol'_{\sqrt{m}}(x)}$, each $\FCol'_i$ is non-zero.
+\end{lemma}
+Observe that under the uniform distribution, the probability that $\mE(x)=1$ is doubly-exponentially small in $\ell$. Indeed, using  Claim~\ref{claim:pv-large}, $\mE(x)=1$ with probability at most $(1-2^{-2(\ell/2+1)})^{20^{\ell/2}}$.
+% and has at most $\ell/2$ colliding layers, and $\Pr_{x}[\mE(x) =1] \ll 2^{-\ell}$.
+
+	
+	
+We are now ready to prove the main lemma, which constitutes to one step of the generator.
+
+\begin{lemma}[Main Lemma]\label{lemma:main}
+Let $\ell, k \in \N$ and $m = 20^\ell$.
+Let $f: \pmone^n \to \pmone$.
+Let $B = D_1 \circ D_2 \circ \ldots \circ D_m$ be a 3ROBP with at most $\ell$ colliding layers in each chunk.
+For $i= 1, \ldots, k$, let $E^{(i)} = \bar{\FCol^{(i)}_1} \wedge \ldots \wedge \bar{\FCol^{(i)}_{m}}$ be an error term with all $\FCol^{(i)}_j$ non-zero.
+Suppose that whenever all $E^{(i)}(x)=0$ then $B(x) = f(x)$.
+Then, with probability at least $1-(k+1)\cdot 2^{-\ell}$, under the restriction $\rho$ from Claim~\ref{claim:assigning},  there exist
+$k^* \in \{k, k+1\}$ new error terms
+$\mE^{(i)} = \bar{\FCol'^{(i)}_1} \wedge \ldots \wedge \bar{\FCol'^{(i)}_{\sqrt{m}}}$ for $i=1, \ldots, k^{*}$ and a program	
+ $B' = D'_1 \circ D'_2 \circ \ldots \circ D'_{\sqrt{m}}$,
+where all $\FCol'^{(i)}_j$ and $D'_j$ are 3ROBPs with at most $\ell/2$ colliding layers, and moreover
+\begin{enumerate}
+	\item 
+	For all $i=1, \ldots, k^{*}$ and $j=1, \ldots, \sqrt{m}$, the 3ROBP $\FCol'^{(i)}_j$ is non-zero.
+\item If for every $i=1,\ldots,k^{*}$ it holds that  $\mE^{(i)}(x) =0$, then $B'(x) = f|_{\rho}(x)$.
+\end{enumerate}
+\end{lemma}
+\begin{proof}
+We apply a random restriction $\rho$ from Claim~\ref{claim:assigning}.
+We say that $\rho$ is good if 
+\begin{itemize}
+	\item $B|_{\rho}$ can be written as a $D'_1 \circ \ldots \circ D'_{m'}$ where each $D'_i$ is a 3ROBP with the first and last state spaces having width at most $2$ and at most $\ell/2$ colliding layers.
+	\item For $i=1, \ldots, k$, the restricted error term $E^{(i)}|_{\rho}$ can be upper bounded by $\mE^{(i)} = \bar{\FCol'^{(i)}_1} \wedge \ldots \wedge \bar{\FCol'^{(i)}_{\sqrt{m}}}$ where each $\FCol'^{(i)}_{j}$ has at most $\ell/2$ colliding layers and is non-zero.
+\end{itemize}
+By Lemma~\ref{lemma:ell reduces} the first event happens with probability at least $1-2^{-\ell}$.
+By Lemma~\ref{lemma:error under restriction} the second event happens with probability at least $1-k\cdot 2^{-\ell}$.
+	
+We prove the two items:
+\begin{enumerate}
+\item
+We show how to approximate $B|_{\rho}$ by a shorter program and a possibly new error term. 
+First, by Claim~\ref{claim:decomposition} we can assume without loss of generality that each $D'_{i}$, except for maybe $D'_1$, is colliding.
+If $m'\le \sqrt{m}$ we take $B' = B|_{\rho}$ and we do not introduce any new error term. In other words, we take $k^{*} = k$. 
+If $m'> \sqrt{m}$, let $j = m'-\sqrt{m}+1$ and let $k^{*} = k+1$.
+By Lemma~\ref{lemma:short programs plus error term}, $B|_{\rho}$ can be approximated by a shorter program $B' := D'_{j} \circ \ldots \circ D'_{m'}$, where the error term is $\bar{\FCol_{j}} \wedge \ldots \wedge \bar{\FCol_{m'}}$.
+The new error term $\mE^{(k+1)}$ is defined as  $\bar{\FCol_{m'-\sqrt{m}+1}} \wedge \ldots \wedge \bar{\FCol_{m'}}$.
+Note that in this case since $j\ge 2$, all functions $\FCol_{j}(x), \ldots, \FCol_{m'}(x)$ are non-zero.
+This proves Item~1.
+\item Whenever $\mE^{(k+1)}(x)=0$ it holds that $B'(x) = B|_{\rho}(x)$. If $\mE^{(1)}(x) = \ldots \mE^{(k)}(x) = 0$, then $E^{(1)}|_{\rho}(x) =  \ldots E^{(k)}|_{\rho}(x) = 0$ making $B|_{\rho}(x) = f|_\rho(x)$. Thus, if both events happens simultaneously, we have  $B'(x) = B|_{\rho}(x) = f|_{\rho}(x)$.\qedhere
+\end{enumerate}
+\end{proof}
+
+We show that applying the main lemma $O(\log \log n)$ times and then applying BRRY's~\cite{BravermanRRY10} generator on the remaining variables yields a PRG for 3ROBPs.
+
+\begin{theorem}[Main Theorem]\label{thm:main-3ROBP-ordered}
+Let $B$ be an ordered 3ROBP of length $n$. Let $0<\eps < o(1/\log\log(n))$.
+Then, applying Claim~\ref{claim:assigning} $O(\log\log(n))$ times and then applying BRRY-generator with seed-length 
+$O(\log(n)(\log \log (n) +  \log(1/\eps))$
+ on the remaining variables yields a PRG $\eps$-fooling $B$.
+\end{theorem}
+\begin{proof}
+We start by applying the pseudorandom assignment from Claim~\ref{claim:assigning} yielding $\rho_0$.
+With  probability at least $1-\eps/n$, we can write $B|_{\rho_0}$ as a $D_1 \circ \ldots \circ D_m$ where each $D_i$ has at most $\ell \le 10 \log(n/\eps)$ colliding layers. \Anote{TODO: requires more details}
+
+We repeat Lemma~\ref{lemma:main} for $k = \log(\ell/\log(1/\eps)) = O(\log \log n)$ iterations.
+We get restrictions $\rho_1, \ldots, \rho_k$.
+Then for $\rho = \rho_0 \circ \rho_1 \circ  \ldots \circ \rho_k$ it holds that $\E_{\rho,x}[B|_{\rho}(x)] = \E_{z}[B(z)] \pm \poly(\eps/n)$.
+Furthermore, by Lemma~\ref{lemma:main}, with probability at least 
+$$
+1-2^{-\ell} - 2\cdot 2^{-\ell/2} - 3\cdot 2^{-\ell/4} - \ldots  - k\cdot 2^{-\ell/2^{k-1}} \ge 1-2k\cdot 2^{-\ell/2^{k-1}} \ge 1-\eps^2 \cdot O(\log \log n) \ge 1-\eps/10
+$$
+over the choice of $\rho$, we can write
+$B|_{\rho}(x)$ as $B'(x) + E^{(1)}(x) + \ldots + E^{(k)}(x)$  where 
+\begin{itemize}
+	\item $B'$ is a 3ROBP of length $n$ with at most $20^{\ell/2^{k}}\cdot \ell/2^{k}$ colliding layers, 
+	\item Each $E^{(1)}, \ldots, E^{(k)}$ is computed by the AND of $20^{\ell/2^{k}}$ non-zero 3ROBP with at most $\ell/2^{k}$
+	 colliding layers. 
+	%\item The probability that under the uniform distribution $E^{(i)}(x) = 1$ is at most $1/\exp(\exp(\Omega(\ell/2^{k}))) \ll \frac{\eps}{10k}$.
+\end{itemize}
+Call such a restriction {\sf good}.
+Note that each $E^{(i)}$ can be computed by a width-4 ROBP with at most $20^{\ell/2^{k}} \cdot \ell/2^{k} \le \poly(1/\eps)$ colliding layers.
+%Recall that $B'$ is a width-3 ROBP with at most $20^{\ell/2^{k}} \cdot \ell/2^{k} \le \poly(1/\eps)$ colliding layers.
+We then apply Corollary~\ref{cor:BRRY} to $B'$ and $E^{(1)}, \ldots, E^{(k)}$ to see that the BRRY-generator $\eps/10k$-fools $B'$ and $E^{(1)}, \ldots, E^{(k)}$ using seed-length 
+$$O(\log \log n + \log(10k/\eps) + \log(\poly(1/\eps)) + 4) \log n = O(\log\log n + \log(1/\eps))\cdot \log(n).$$
+
+By Claim~\ref{claim:pv-large}, the probability that the error terms equal $1$ under the uniform distribution is at most $1/\exp(\exp(\Omega(\ell/2^{k}))) \ll \frac{\eps}{10k}$. Thus, for any good restriction $\rho$, we get that when $x$ is sampled from the BRRY-generator, the probability that $E^{(1)}(x) + \ldots + E^{(k)}(x) \neq 0$ is at most $\eps/5$.
+Overall we get
+%with probability at least $1-\eps/5$, we have that $B'(x) = B|_{\rho}(x)$.
+%And
+\begin{align*}
+\E_{\rho, x\sim \BRRY}[B|_{\rho}(x)] 
+&= \E_{\rho, x\sim \BRRY}[B|_{\rho}(x)| \rho\text{ is good}] \pm \eps/10\tag{most $\rho$'s are good}\\
+&= \E_{\rho, x\sim \BRRY}[B'(x)| \rho\text{ is good}] \pm (\eps/5 + \eps/10)\tag{BRRY fools the error terms}\\
+&= \E_{\rho, z\sim U}[B'(z)| \rho\text{ is good}] \pm (\eps/10k + \eps/5 + \eps/10)\tag{BRRY fools $B'$}\\
+&= \E_{\rho, z\sim U}[B|_{\rho}(z)| \rho\text{ is good}] \pm (\eps/10 + \eps/10k + \eps/5 + \eps/10)\tag{the error terms are small under the uniform distribution}\\
+&= \E_{\rho, z\sim U}[B|_{\rho}(z)] \pm (\eps/10 + \eps/10 + \eps/10k + \eps/5 + \eps/10)\tag{most $\rho$'s are good}\\
+&= \E_{z\sim U}[B(z)] \pm \eps.\tag{$\rho$ maintains the acceptance probability of $B$}
+\end{align*}
+
+\end{proof}
+
+}
+\subsection{Pseudorandom generator for unordered 3ROBPs}
+In this section, using the recent generator of CHHL~\cite{CHHL18}, 
+and a Fourier bound from Steinke, Vadhan and Wan~\cite{SteinkeVW14}, 
+we show that we can also handle unordered 3ROBPs, thus proving Theorem~\ref{thm:main-3ROBP-unordered}.
+\begin{lemma}[Lemma~3.14~\cite{SteinkeVW14}]
+	Let $\ell\in \N$ and let $B$ be a width-$w$ ROBP with at most $\ell$ colliding layers. 
+	Then, for all $k=1, \ldots, n$ it holds that $L_{1,k}(f) \le O(w^{3}\cdot \ell)^{k}$.
+\end{lemma}
+
+\begin{theorem}[Theorem~4.5 \cite{CHHL18}] 
+Let $F$ be a family of $n$-variate Boolean functions closed under restrictions. Assume that for all $f\in F$ for all $k=1,\ldots, n$, $L_{1,k}(f) \le a\cdot b^k$.
+Then, for any $\eps>0$, there exists an explicit PRG which fools $F$ with error $\eps$, whose seed length is 
+$O( \log(n/\eps) \cdot (\log\log(n) + \log(a/\eps)) \cdot b^2)$. 
+\end{theorem}
+	
+\begin{corollary}\label{cor:CHHL}
+There is an explicit PRG that $\eps$-fools unordered ROBPs with width $w$ length $n$ and at most $\ell$ colliding layers using seed length
+$$O(\log(n/\eps) \cdot (\log \log n + \log(1/\eps)) \cdot w^6 \ell^2 )$$
+\end{corollary}
+
+\begin{proof}[Proof of Theorem~\ref{thm:main-3ROBP-unordered}]
+The proof is essentially the same as that of Theorem~\ref{thm:main-3ROBP-ordered}, where instead of using the generator from Theorem~\ref{thm:foolfewcollisions} to set the bits after the random restriction, we use the generator from the above corollary. The final seed-length as a worse dependence on $\delta$ as we need to set $\ell = \poly(1/\delta)$ in the above corollary. 
+\end{proof}
+\ignore{
+\begin{theorem}\label{thm:main-3ROBP-unordered}
+Let $B$ be an unordered 3ROBP of length $n$. Let $0<\eps\le 1/o(\log\log(n))$.
+Then, applying Claim~\ref{claim:assigning} $O(\log\log(n))$ times and then applying CHHL-generator with seed-length 
+$O(\log(n) \log \log(n)\cdot \poly(1/\eps) )$
+ on the remaining variables yields a PRG $\eps$-fooling $B$.
+\end{theorem}
+\begin{proof}
+	The proof is similar to that of Theorem~\ref{thm:main-3ROBP-ordered}, replacing the BRRY-generator with the CHHL-generator.
+\end{proof}}
+
+
+
+
+%\begin{proposition}[Proposition~3.5\cite{SteinkeVW14}].
+%Let $\ell,m \in \N$.
+%Let $B = D_1 \circ D_2 \circ \ldots \circ D_m$ be a ROBP where each $D_i$ is a 3ROBP with the first and last state spaces having width at most 2, and at most $\ell$ colliding layers.
+%	Then $L_{1,k}(B) \le m \cdot O(\ell)^k$ for all $k$.
+%\end{proposition}
+%
+%\begin{proposition}
+%	Let $B = D_1 \wedge \cdots \wedge D_m$ 
+%	where each $D_i$ is a 3ROBP with the first and last state spaces having width at most 2, and at most $\ell$ colliding layers. How can we fool it?
+%\end{proposition}
+
+

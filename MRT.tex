@@ -1,0 +1,249 @@
+\documentclass[12pt]{article}
+\usepackage{xspace}
+\usepackage[colorlinks=true,linkcolor=red,citecolor=blue]{hyperref}
+\usepackage{amssymb,amsmath,amsthm,graphicx,color,bbm}
+\usepackage{thmtools, thm-restate}
+\usepackage[margin=1.in]{geometry}
+\usepackage{multirow,array}
+\allowdisplaybreaks
+
+\usepackage[capitalise,nameinlink]{cleveref}
+
+\usepackage{algorithm}
+\usepackage[noend]{algpseudocode}
+
+%\floatname{algorithm}{Test}
+\renewcommand{\algorithmicrequire}{\textbf{Input:}}
+\renewcommand{\algorithmicensure}{\textbf{Output:}}
+\renewcommand{\algorithmicindent}{1.0em}
+
+
+%Makes a wider version of \bar{}
+\makeatletter
+\newcommand*\rel@kern[1]{\kern#1\dimexpr\macc@kerna}
+\newcommand*\widebar[1]{%
+  \begingroup
+  \def\mathaccent##1##2{%
+    \rel@kern{0.8}%
+    \overline{\rel@kern{-0.8}\macc@nucleus\rel@kern{0.2}}%
+    \rel@kern{-0.2}%
+  }%
+  \macc@depth\@ne
+  \let\math@bgroup\@empty \let\math@egroup\macc@set@skewchar
+  \mathsurround\z@ \frozen@everymath{\mathgroup\macc@group\relax}%
+  \macc@set@skewchar\relax
+  \let\mathaccentV\macc@nested@a
+  \macc@nested@a\relax111{#1}%
+  \endgroup
+}
+\makeatother
+
+
+\newcommand{\restate}[2]{\medskip
+\noindent{\bf #1 (restated).}{\sl #2}}
+
+
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{fact}[theorem]{Fact}
+\newtheorem{conjecture}[theorem]{Conjecture}
+\newtheorem{exercise}[theorem]{Exercise}
+\newtheorem{question}[theorem]{Question}
+\newtheorem*{claimNoNum}{Claim}
+\newtheorem*{lemmaNoNum}{Lemma}
+\newtheorem*{theoremNoNum}{Theorem}
+\newtheorem*{questionNoNum}{Question}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{thm}{Theorem}
+\newtheorem{open}[theorem]{Open Problem}
+
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+\theoremstyle{plain}
+
+\newenvironment{proofof}[1]{\begin{trivlist} \item {\bf Proof
+#1:~~}}
+  {\qed\end{trivlist}}
+
+
+\def\R{{\mathbb{R}}}
+\def\F{{\mathbb{F}}}
+\def\C{{\mathbb{C}}}
+\def\N{{\mathbb{N}}}
+\def\Z{{\mathbb{Z}}}
+\def\Q{{\mathbb{Q}}}
+
+\renewcommand{\Pr}{\mathop{\bf Pr\/}}
+\newcommand{\E}{\mathop{\bf E\/}}
+\newcommand{\EE}[1]{\mathop{\bf E\/}\left[ {#1} \right]}
+\def\var{{\mathop{\bf Var\/}}}
+\def\cov{{\mathop{\bf Cov\/}}}
+\newcommand{\Es}[1]{\mathop{\bf E\/}_{{\substack{#1}}}}
+\newcommand{\Var}{\mathop{\bf Var\/}}
+\newcommand{\Cov}{\mathop{\bf Cov\/}}
+
+\newcommand{\abs}[1]{\left|#1\right|}
+
+\def\Ber{{\mathrm{Ber}}}
+\def\Bin{{\mathrm{Bin}}}
+\def\pr{\Pr}
+
+\newcommand{\one}{{\mathbbm{1}}}
+\def\B{{\{0,1\}}}
+\def\pmone{{\{\pm1\}}}
+\def\sgn{\mathrm{sgn}}
+
+\def\spn{{\mathrm{span}}}
+\def\poly{{\mathrm{poly}}}
+\def\OR{{\mathrm{OR}}}
+\def\AND{{\mathrm{AND}}}
+\def\Inf{{\mathrm{Inf}}}
+
+\def\l{{\ell}}
+\newcommand{\modulo}[1]{~(\mathrm{mod~}#1)}
+\newcommand{\remove}[1]{}
+
+\newcommand{\deff}{\triangleq}
+\newcommand{\mathify}[1]{\ifmmode{#1}\else\mbox{$#1$}\fi}
+\newcommand{\paramcomplexityclass}[2]{\mathify{{\bf #1}\left(#2\right)}\xspace}
+\newcommand{\complexityclass}[1]{{\bf{#1}}\xspace}
+\newcommand{\problemname}[1]{{\textsf{#1}}\xspace}
+\newcommand{\scriptcomplexityclass}[3]{\mathify{{\bf #1}_{\bf #2}^{\bf #3}}\xspace}
+\newcommand{\inner}[1]{\langle{#1}\rangle}
+
+% We continue with standard complexity classes.
+\renewcommand{\P}{\complexityclass{P}}
+\newcommand{\NP}{\complexityclass{NP}}
+\newcommand{\CONP}{\complexityclass{coNP}}
+\newcommand{\BPP}{\complexityclass{BPP}}
+\newcommand{\RP}{\complexityclass{RP}}
+\newcommand{\CORP}{\complexityclass{coRP}}
+\newcommand{\ZPP}{\complexityclass{ZPP}}
+\newcommand{\MIP}{\complexityclass{MIP}}
+\newcommand{\AM}{\complexityclass{AM}}
+\newcommand{\ACzero}{\complexityclass{AC^0}}
+\newcommand{\MA}{\complexityclass{MA}}
+\newcommand{\DNF}{\complexityclass{DNF}}
+\newcommand{\DNFs}{\complexityclass{DNFs}}
+\newcommand{\RL}{\complexityclass{RL}}
+\newcommand{\Ls}{\complexityclass{L}}
+
+
+\newcommand{\codim}{\mathrm{codim}}
+\newcommand{\mcp}{\mathrm{C_{min}^{\oplus}}}
+\newcommand{\Rp}{\mathcal{R}_p}
+\newcommand{\spar}{\mathrm{sparsity}}
+\newcommand{\tail}{\mathrm{tail}}
+\newcommand{\true}{\mathbf{true}}
+\newcommand{\false}{\mathbf{false}}
+\newcommand{\DT}{\mathrm{DT}}
+\newcommand{\ADVpm}{\mathrm{ADV}^{\pm}}
+\newcommand{\W}{\mathbf{W}}
+\renewcommand{\star}{*}
+\newcommand{\Ev}{\mathcal{E}_\nu}
+\newcommand{\Evapp}{\tilde{\mathcal{E}}_\nu}
+\newcommand{\m}{m}
+\newcommand{\eps}{\varepsilon}
+\newcommand{\rank}{\mathrm{rank}}
+\newcommand{\FF}{\mathcal{F}}
+\newcommand{\tildeO}{{\widetilde O}}
+
+%% MACROS for this paper
+\newcommand{\zo}{\{0,1\}}
+\newcommand{\cB}{\mathcal{B}}
+\newcommand{\cA}{\mathcal{A}}
+\newcommand{\cM}{\mathcal{M}}
+\newcommand{\cE}{\mathcal{E}}
+\newcommand{\Eff}{\mathrm{Eff}}
+\newcommand{\Dtagx}{{\mathcal{D}'_x}}
+\newcommand{\Dx}{{\mathcal{D}_x}}
+
+\newcommand{\D}{{\mathcal{D}}}
+\newcommand{\error}{{\mathsf{err}}}
+
+\newcommand{\Vsmall}{V_{\mathsf{small}}}
+
+\renewcommand{\bar}{\widebar}
+\renewcommand{\hat}{\widehat}
+\renewcommand{\tilde}{\widetilde}
+
+\newcommand{\Bias}{\mathsf{Bias}}
+
+
+\renewcommand{\boldsymbol}{}
+\newcommand{\authnote}[4]{{\bf [{\color{#3} #1's Note:} {\color{#4} #2}]}}
+\newcommand{\Anote}[1]{\authnote{Avishay}{#1}{red}{blue}}
+\newcommand{\Rnote}[1]{\authnote{Raghu}{#1}{red}{blue}}
+\newcommand{\Onote}[1]{\authnote{Omer}{#1}{red}{blue}}
+\newcommand{\ignore}[1]{}
+
+
+
+\pretolerance=2000
+
+\begin{document}
+
+\title{Pseudorandom Generators for Width-3 Branching Programs}
+
+\author{
+Raghu Meka\\
+\small UCLA\\
+\and 
+Omer Reingold\thanks{{\tt reingold@stanford.edu}. Supported in part by NSF grant CCF-1749750.
+}\\
+\small Stanford University\\
+\and 
+Avishay Tal\thanks{\texttt{avishay.tal@gmail.com}. Supported by a Motwani Postdoctoral Fellowship and by NSF grant CCF-1749750.
+}\\
+\small Stanford University\\
+}
+
+%\date{}
+\maketitle
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{abstract}
+For every $\eps>0$,
+we construct a pseudorandom generator using $\tilde{O}(\log(n/\eps))$ that $\eps$-fools: (1) read-once polynomials on $n$ variables, (2) locally-monotone read-once branching programs (ROBPs) of length $n$ and width $3$, and (3) constant-width ROBPs of length $n$ with width-$2$ every at most $\poly\log(n)$ layers.
+
+Our construction relies on the Ajtai-Wigderson paradigm \cite{AW85}, CHRT's results \cite{CHRT17} and Viola's \cite{Viola08} or Lovett's \cite{Lovett08} pseudorandom generators for low-degree polynomials.
+
+Furthermore, for width-3 ROBPs programs we have two incomparable results:
+\begin{enumerate}
+	\item Based on the work of BRRY~\cite{BravermanRRY10}, we construct a pseudorandom generator $\eps$-fooling \textbf{ordered} ROBPs of width-$3$ and length-$n$ with seed length $\tilde{O}(\log(n) \cdot \log(1/\eps))$.
+	\item Based on the work of CHHL~\cite{CHHL18}, we construct a pseudorandom generator $\eps$-fooling \textbf{unordered} ROBPs of width-$3$ and length-$n$ swith seed length $\tilde{O}(\log(n) \cdot \poly(1/\eps))$.
+\end{enumerate}
+This is the first improvement for width-$3$ ROBPs since the work of Nisan~\cite{Nisan92}.
+\end{abstract}
+
+%\thispagestyle{empty}
+
+%\clearpage 
+%\setcounter{page}{1}
+%\tableofcontents
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\input{prelim}
+\input{width_3_to_XOR}
+\input{XOR_short}
+\input{assign_all}
+\input{prg_width3}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section*{Acknowledgements}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\bibliographystyle{alphaabbr}
+\bibliography{bibs.bib}
+
+
+\input{appendix}
+
+\end{document}
+

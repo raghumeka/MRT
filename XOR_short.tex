@@ -1,0 +1,443 @@
+\newcommand{\Tvar}{\mathbf{{Tvar}}}
+
+\section{Pseudorandom restrictions for the XOR of short ROBPs}
+In this section, we prove Theorem~\ref{thm:main}. 
+Let $B_1, \ldots, B_m$ be pairwise disjoint subsets of $[n]$, each of size at most $b$. For $i=1, \ldots, m$ let $f_i : \pmone^{B_i} \to \pmone$ be a width $w$ ROBP. We construct a pseudorandom generator that $\eps$-fools $f = \prod_{i=1}^{m}{f_i}$.
+We recall the statement of Theorem~\ref{thm:main} and the construction.
+\begin{theorem}Let $n,w,b\in \N$, $\eps>0$. There exists an explicit pseudorandom restriction assigning $p = 1/O(\log(b \cdot \log(n/\eps)))^{2w}$ fraction of  $n$ variables using $O(w \cdot \log (n/\eps) \cdot (\log\log(n/\eps) + \log(b)))$ random bits, that maintains the acceptance probability of any XOR of ROBPs of width-$w$ and length-$b$ up to error $\eps$.
+\end{theorem}
+
+Recall that the pseudorandom restriction assigns $p$ fraction of the variables as follows: 
+%\begin{quote}
+\begin{enumerate}
+	\item Choose a set of coordinates $T \subseteq [n]$ according to a $\delta_T$-biased distribution with marginals $p$, for $\delta_T := p^{ O(\log(n/\eps))}$.
+	\item Assign the variables in $T$ according to a $\delta_x$-biased distribution, for $\delta_x := (\eps/n)^{O(\log b)}$.
+\end{enumerate}
+%\end{quote}
+
+\paragraph{Analysis.} We shall assume without loss of generality that for all $i=1, \ldots, m$  it holds that $\E[f_i] \ge 0$.
+We shall also assume without loss of generality that for all $i=1, \ldots, m$ it holds that $\var[f_i] > 0$ (i.e., that the functions are non-constant). 
+Since the functions $f_i$ are Boolean and depend on at most $b$ bits, 
+we have $\var[f_i] =\Pr[f_i=1]\cdot \Pr[f_i=-1] \ge  2^{-b}\cdot(1-2^{-b}) \ge 2^{-1-b}$.
+
+We partition the functions into $O(\log b)$ buckets according to their variance.
+Let $\sigma_0 = 1$, 
+for every $j \in \{1,\ldots, \log_{1.1}(b+1)\}$, let $\sigma_j = 2^{-1.1^j}$ and
+$I_j = \{i\in [m]: \var[f_i] \in (\sigma_{j},\sigma_{j-1}]\}$.
+Let $C>0$ be a sufficiently large constant.
+We consider two cases in our analysis: \begin{description}
+\item[Low-Variance Case:] 
+For every $j \in \{1,\ldots, \log_{1.1}(b+1)\}$ we have
+$$\sum_{i\in I_j} \var[f_i] \le C \cdot \log^2(n/\eps)/(\sigma_{j-1})^{0.1}\;.$$
+\item[High-Variance Case:] 
+There exists a $j \in \{1,\ldots, \log_{1.1}(b+1)\}$ with $$\sum_{i\in I_j} \var[f_i] > C\cdot \log^2(n/\eps)/(\sigma_{j-1})^{0.1}\;.$$
+\end{description}
+
+\paragraph{Setting Up Parameters:}
+Let $C'>1$ be a sufficiently large constant.
+Set 
+\begin{align}
+\label{eq:delta_T}
+	&\delta_{T} \triangleq p^{2C' \cdot \log(n/\eps)},\\
+\label{eq:delta}
+&\delta \triangleq  (\eps/n)^{10 C'}, \\
+\label{eq:delta'_x}
+	&\delta'_x \triangleq (\eps/n)^{100 C'},\\
+\label{eq:delta_x}
+	&\delta_x \triangleq  (\delta'_x)^{\log_{1.1}(b+1)}.
+\end{align}
+%Whenever we write $\poly(\eps/n)$, think of it as $(\eps/n)^c$ for a sufficiently large constant $c>1$.
+
+\subsection{Low-Variance Case}
+For $j = 1, \ldots, \log_{1.1}(b+1)$, 
+let $F_j(x) = \prod_{i \in I_j} f_j(x)$. 
+Thus, $f = \prod_{j} F_j$.
+Let $\D_p$ be any $\delta_T$-biased distribution with marginals $p$. 
+For $j\in \{1,\ldots,\log_{1.1}(b+1)\}$, we shall show that with probability at least $1-\eps/2n$ over the choice of $T\sim \D_p$, it holds that
+\begin{equation}\label{eq:n/40}
+\abs{\E_{x\sim \Dtagx}[\tilde{F_j}(x)] - 
+\E_{z\sim U_T}[\tilde{F_j}(z)]}  \le \eps/n^{40}\;,\footnote{recall that we denote by $\tilde{g} = \Bias_T(g)$ for any function $g$.}
+\end{equation}
+for any $\delta'_x$-biased distribution $\Dtagx$ over $\pmone^{n}$.
+Thus, by union bound Eq.~\eqref{eq:n/40} holds
+for all $j \in \{1, \ldots, \log_{1.1}(b+1)\}$ simultaneously with probability at least $1-\eps/2$ over $T\sim\D_p$.
+%
+Using the following XOR lemma for small-biased distributions from \cite{GopalanMRTV12} we get that any 
+ $(\delta'_x)^{\log_{1.1}(b+1)}$-biased distribution, fools $\tilde{f}(x) = \prod_{j=1}^{\log_{1.1}(b+1)}{\tilde{F_j}(x)}$ with error at most $16^{\log_{1.1}(b+1)}\cdot 2(\eps/n^{40})\le \eps/2$ (using $b\le n$).
+%
+\begin{lemma}[\protect{\cite[Thm.~4.1]{GopalanMRTV12}}, restated]\label{lemma:3.2}
+	Let $0 < \eps< \delta\le 1$.
+ 	Let $F_1, \ldots, F_k : \pmone^n \to [-1,1]$ be functions on disjoint input variables such that each $F_i$ is $\delta$-fooled by any $\eps$-biased distribution.
+ 	Let $H:[-1,1]^k \to [-1,1]$ be a multilinear function in its inputs.
+ 	Then $H(F_1(x), \ldots, F_k(x))$ is $(16^k \cdot 2\delta)$-fooled by any $\eps^k$-biased distribution.
+\end{lemma}
+In Appendix~\ref{app:GMRTV}, we show how to derive Lemma~\ref{lemma:3.2} from \cite[Thm.~4.1]{GopalanMRTV12}.
+
+\medskip
+\noindent
+In the remainder of this section, we focus on fooling a single $F_j$, that is, fooling the product (i.e., XOR) of functions $\{f_i\}_{i\in I_j}$ for which  $\var[f_i] \in (\sigma_{j}, \sigma_{j-1}]$.
+We note that since we are in the ``Low-Variance Case'', then 
+ \begin{equation} \label{eq:m}
+ |I_j| \le C \cdot \sigma_{j}^{-1} \cdot \sigma_{j-1}^{-0.1}\cdot  \log^2(n/\eps)\;.
+ \end{equation}
+We handle two cases depending on whether $\sigma_{j-1}$ is big or not.
+
+
+\paragraph{The case of $\sigma_{j-1} \ge 1/ (C \cdot \log(n/\eps))^{20}$ :}
+In this case there are at most $O(\sigma_{j-1}^{-1.2}\cdot \log^2(n/\eps)) \le \poly\log(n/\eps)$ functions in $I_j$, each computed by a width-$w$ ROBP on at most $b$ bits. Thus, $F_j := \prod_{i\in I_j} f_i$ can be computed by a ROBP of length at most $n' = b\cdot \poly\log(n/\eps)$ and width at most $2w$. 
+Using Theorem~\ref{thm:CHRTa} on $F_j$ (which has length $n'$ and width $2w$), with probability at least $1-\delta$ the spectral-norm of $\tilde{F_j}$ is at most $O((n' w)^3/\delta)$, thus any $\delta'_x$-biased distribution $O(\delta'_x \cdot (n' w)^3/\delta)$-fools  $\tilde{F_j} = \prod_{i \in I_j}{\tilde{f_i}(x)}$. For a large enough choice for $C'$, $O(\delta'_x \cdot (n' w)^3/\delta) \le \eps/n^{40}$ and we are done. 
+
+
+\paragraph{The case of $\sigma_{j-1} < 1/ (C \cdot \log(n/\eps))^{20}$ :}
+In this case all variances in $I_j$ are certainly smaller than $0.5$, and hence for all $i\in I_j$, we have $\E[f_i]^2 = \E[f_i^2]-\var[f_i] = 1-\var[f_i] \in [0.5,1]$.
+Let $$\mu_i = \E[f_i]\qquad\text{and}\qquad g_i(x) \triangleq \frac{f_i(x)}{\mu_i} - 1.$$
+Then, $$\prod_{i}{f_i(x)} = \prod_{i}{\mu_i} \cdot (1+g_i(x)).$$
+We have $\E[g_i] = 0$ and $\Var[g_i] = \Var[f_i]/\mu_i^2 \in [\var[f_i], \var[f_i] \cdot 2]$.
+We will show that with high probability over $T$, any $\delta'_x$-biased distribution fools $\prod_{i}{\mu_i} \cdot \prod_{i}{(1+\tilde{g_i}(x))}$. 
+
+For ease of notation, in this case we think of $I_j$ as $[m]$ and denote by $\sigma = \sigma_{j-1}$.
+The proof strategy for this part follows the work of Gopalan and Yehudayoff \cite{GopalanY14}. 
+We note that 
+$$\prod_{i=1}^{m}{(1+\tilde{g_i}(x))} = 1+\sum_{k=1}^{m} S_k(\tilde{g_1}(x), \tilde{g_2}(x), \ldots, \tilde{g_{m}}(x)),$$ 
+where $S_k$ is the $k$-symmetric polynomial given by $S_k(y_1, \ldots, y_m) = \prod_{R \subseteq [m], |R|=k}{\prod_{i \in R} y_i}$.
+We show that $x$ and $T$ fool the low-degree symmetric polynomials. Then, the following theorem by Gopalan and Yehudayoff \cite{GopalanY14} bootstraps this to show that $x$ and $T$ also fool the sum of all high-degree symmetric polynomials.
+
+\begin{theorem}[Gopalan-Yehudayoff Tail Inequalities \cite{GopalanY14}]\label{thm:GY}
+Let $y_1, \ldots, y_{m} \in \R$.
+Suppose 
+$|S_{\ell}(y_1, \ldots, y_{m})| \le \frac{t^{\ell}}{\sqrt{\ell!}}$ 
+and 
+$|S_{\ell+1}(y_1, \ldots, y_m)| \le \frac{t^{\ell+1}}{\sqrt{(\ell+1)!}}$
+for some $t$ and $\ell$. 
+Then, for every 
+$k \in \{\ell, \ldots, {m}\}$ 
+it holds that 
+$|S_{k}(y_1, \ldots, y_{m})| \le (6et)^{k} \cdot (\ell/k)^{k/2}$.
+Furthermore, if $6et \le 1/2$, then
+$$\sum_{k=\ell}^{{m}} |S_{k}(y_1, \ldots, y_{m})| \le 2\cdot (6et)^{\ell}.$$
+\end{theorem}
+
+\subsubsection*{Analyzing the Symmetric Polynomials}
+From Eq.~\eqref{eq:m} and our assumption that 
+$\sigma < 1/(C\cdot \log(n/\eps))^{20}$ 
+we get that $m \le \sigma^{-1.3}$.
+Recall that $C'$ is a sufficiently large constant and recall the definition of $\delta, \delta'_x, \delta_T$ from Eqs.~\eqref{eq:delta_T}, \eqref{eq:delta} and \eqref{eq:delta'_x}.
+We set 
+\begin{equation}
+\ell \triangleq C' \cdot \log(n/\eps)/ \log(1/\sigma)
+\end{equation}
+%and assume that $\ell$ is an even integer.
+In the following, we shall use the facts that $\sigma^{-\ell}, m^{\ell} \ll 1/\delta$ and $\delta'_x \ll \delta$.
+
+\begin{claim}\label{claim:good}
+Let $T \sim \D_p$.
+Let $R \subseteq [m]$ be a set of size at most $\ell$.
+Then, with probability at least $1-O(b \ell w)^3 \cdot \delta$ over the choice of $T$,
+$\prod_{i\in R} \tilde{f_i}(x)$ has spectral-norm at most $1/\delta$.
+\end{claim}
+\begin{proof}
+Note that $\prod_{i\in R} f_i(x)$ can be computed by a ROBP with length $b \cdot \ell \le O(b \cdot \log(n/\eps))$ and width $2w$ (as in the case where $\sigma_j$ is big).
+Apply Theorem~\ref{thm:CHRTa} to $\prod_{i\in R} f_i(x)$. 
+\end{proof}
+
+We say that $T\subseteq[n]$ is a {\sf good} set if for all sets $R \subseteq [{m}]$ of  size at most $\ell$, 
+the spectral-norm of $\prod_{i\in R}{\tilde{f}_i}$ is at most $1/\delta$.
+We observe that by Claim~\ref{claim:good}, the probability that $T$ is good is at least 
+$1-({m}+1)^{\ell}\cdot O(b\ell w)^3 \cdot \delta \ge 1-\eps/10n$ (using Eq.~\eqref{eq:m} and \eqref{eq:delta}).
+\begin{claim}\label{claim:S_k small spectral}
+If $T$ is good, then for any $k\le \ell+1$, 
+$S_{k}(\tilde{g_1}, \tilde{g_2},\ldots, \tilde{g_{m}})$ has  spectral-norm at most 
+$\delta^{-1}\cdot (4{m})^{k} \le \delta^{-2}$.
+\end{claim}
+
+\begin{proof}
+We expand the $k$-symmetric polynomial:
+$S_{k}(\tilde{g_1}(x),\ldots, \tilde{g_m}(x)) = \sum_{R \subseteq [m], |R|=k} \prod_{r\in R} \widetilde{g_r}(x)$.
+Since $T$ is good, each summand has spectral-norm
+\begin{align*} 
+L_1\bigg(\prod_{r\in R}  \widetilde{g_r}(x)\bigg)
+&=L_1\Bigg(\prod_{r\in R}  \Big(\frac{\widetilde{f_r}(x)}{\E[f_r]} -1\Big)\Bigg) 
+\le L_1\bigg(\sum_{Q \subseteq R}  (-1)^{|R|-|Q|} \prod_{r \in Q} \frac{\widetilde{f_r}(x)}{\E[f_r]}\bigg) 
+\le 2^{k} \cdot \delta^{-1}\cdot 2^{k}\;,
+\end{align*}
+(using $\E[f_r] \ge 1/2$).
+Summing over all $\binom{m}{k} \le m^k$ summands completes the proof.
+\end{proof}
+
+We wish to show that with high probability the total variance under restrictions $\sum_{i}\var[\tilde{f}_i]$ is small. Towards this goal, we prove a bound on the $\ell$-th moment of the total variance.
+\begin{claim}\label{claim:Var_fi ell}
+$
+\E_{T\sim \D_p}[(\sum_{i=1}^m \var[\tilde{f}_i])^{\ell}] \le 
+ 2 \cdot (2\sigma^{0.2})^\ell
+$
+\end{claim}
+\begin{proof}
+Fix $(i_1, \ldots, i_{\ell})\in [m]^{\ell}$, not necessarily distinct indices. By Lemma~\ref{lemma:vars_prod}
+\begin{align*}
+	\E_{T\sim \D_p}\left[\prod_{j=1}^{\ell} \Var[\tilde{f_{i_j}}]]\right] 
+	&\le \E_{T\sim \Rp}\left[\prod_{j=1}^{\ell}\Var[\tilde{f_{i_j}}]\right] 
+	+ \delta_T \cdot\prod_{j=1}^{\ell} \Var[{f_{i_j}}],
+\end{align*}
+from which we deduce
+$$
+\E_{T\sim \D_p}\left[\Big(\sum_{i=1}^m \var[\tilde{f}_i(z)]\Big)^{\ell}\right] \le 
+ \E_{T\sim \Rp}\left[\Big(\sum_{i=1}^m \var[\tilde{f}_i(z)]\Big)^{\ell}\right] + \delta_T \cdot m^{\ell} \sigma^{\ell} \;.
+$$
+We are left to bound $\E_{T\sim \Rp}[(\sum_{i=1}^m \var[\tilde{f}_i])^{\ell}]$. 
+By Fact~\ref{fact:bias-fnc-Fourier}, for any $i\in[m]$, the random variable $X_i = \Var[\tilde{f_i}]/\var[f_i]$ (whose value depends on the choice of $T\sim \Rp$) is bounded in $[0,1]$.
+By Theorem~\ref{thm:HC}, its expected value is at most $\Var[f_i]^{0.5} \le \sigma^{0.5}$.
+Taking $X = \sum_{i=1}^{m}X_i$, we get that $X$ is the sum of $m$ independent random variables bounded in $[0,1]$.
+Using $m \le \sigma^{-1.3}$, we have that $\E[X] \le \sigma^{0.5} \cdot m \le \sigma^{-0.8}$.
+Thus, by Chernoff's bounds, with probability at least $1-\exp(-\Omega(\sigma^{-0.8}))$
+we have
+$X \le 2\cdot \sigma^{-0.8}$.
+In such a case 
+$\sum_{i} \var[\tilde{f_i}] 
+\le 2 \cdot \sigma^{-0.8} \cdot \sigma 
+\le 2\sigma^{0.2}$.
+We get $\E_{T\sim \Rp}[(\sum_{i=1}^m \var[\tilde{f}_i])^{\ell}] \le \exp(-\Omega(\sigma^{-0.8}))\cdot (\sigma m)^{\ell} + 
+(2\sigma^{0.2})^{\ell}$, which gives
+\[\E_{T\sim \D_p}\left[\Big(\sum_{i=1}^m \var[\tilde{f}_i]\Big)^{\ell}\right]  \le 
+\delta_T \cdot m^{\ell} \sigma^{\ell}  + \exp(-\Omega(\sigma^{-0.8}))\cdot (\sigma m)^{\ell} + 
+(2\sigma^{0.2})^{\ell} \le 2\cdot (2 \sigma^{0.2})^{\ell}.\qedhere
+\]
+\end{proof}
+
+
+We say that a set $T\subseteq [n]$ is {\sf excellent} if $T$ is good and $\sum_{i}\var[\tilde{g}_i] \le \sigma^{0.1}$.
+
+\begin{claim}
+$\Pr_{T\sim \D_p}[\text{$T$ is not excellent}] \le \eps/10n + O(\sigma)^{0.1\ell} \le \eps/2n$	
+\end{claim}
+\begin{proof}
+Note that $\sum_{i}\Var[\tilde{g_i}] \le 2\sum_{i}\Var[\tilde{f_i}]$ and apply Markov's inequality on $(2\sum_{i}\Var[\tilde{f_i}])^{\ell}$ using Claim~\ref{claim:Var_fi ell}.
+\end{proof}
+
+\begin{claim}\label{claim:symmetric-excellent}
+Let $T$ be an excellent set. Let $\Dtagx$ be any $\delta'_x$-biased distributions.
+Then, for $k = 1, \ldots, \ell+1$ we have
+$$\E_{x\sim \Dtagx}[ S_{k}^2(\tilde{g}_1(x), \ldots, \tilde{g}_m(x))] \le  \frac{2}{k!} \cdot \sigma^{0.1 k}$$
+and $$\left|\E_{x \sim \Dtagx}[S_{k}(\tilde{g}_1(x), \ldots, \tilde{g}_m(x))]\right| \le (\eps/n)^{C'}.$$
+\end{claim}
+
+\begin{proof}
+	Recall that $\delta = (\eps/n)^{10C'}$ and $\delta'_x = (\eps/n)^{100C'}$. The first claim relies on the following:
+	 \begin{enumerate}
+		\item $S_k^2$ has small spectral-norm (using Claim~\ref{claim:S_k small spectral}, since $T$ is good) and hence is fooled by $\Dtagx$. In details, its spectral-norm is at most $L_1(S_k)^2 \le \delta^{-4}$ and $\Dtagx$ is $\delta'_x$-biased. Thus $$\Big|\E_{x\sim U_n}[S_k^2(\tilde{g}_1(x), \ldots, \tilde{g}_m(x))] - \E_{x\sim \Dtagx}[S_k^2(\tilde{g}_1(x), \ldots, \tilde{g}_m(x))]\Big| \le \delta^{-4} \cdot \delta'_x \le \delta \ll \frac{1}{k!} \cdot \sigma^{0.1 k}.$$
+		\item 	The expectation of $S_k^2(\tilde{g}_1(x), \ldots, \tilde{g}_m(x))$ on a uniformly chosen $x$ is at most 
+\begin{align*}\E_{x\sim U_n}[S_k^2(\tilde{g}_1(x), \ldots, \tilde{g}_m(x))] &= \sum_{T, T' \subseteq [m], |T|=|T'|=k} \E_{x\sim U_n} \bigg[\prod_{i\in T} \tilde{g}_i(x)\prod_{i'\in T'} \tilde{g}_{i'}(x)\bigg]\\
+&=	\sum_{T\subseteq [m], |T|=k} \E_{x\sim U_n} \bigg[\prod_{i\in T} (\tilde{g}_i(x))^2\bigg] \tag{Since $\E[\tilde{g_i}] = 0$}\\
+&
+=	\sum_{T\subseteq [m], |T|=k} \prod_{i\in T} \var[{g}_i] \le  \frac{1}{k!} \cdot \Big(\sum_{i=1}^{m}{\var[\tilde{g_i}]}\Big)^{k} \le \frac{1}{k!} \cdot \sigma^{0.1k} \tag{Maclaurin's inequality}
+\end{align*}
+
+
+
+	\end{enumerate} 
+	The second claim relies on the following:	
+	\begin{enumerate}
+		\item $S_k$ has small spectral-norm (using Claim~\ref{claim:S_k small spectral}, since $T$ is good) and hence is fooled by $\Dtagx$. In details, its spectral-norm is at most $\delta^{-2}$ and $\Dtagx$ is $\delta'_x$-biased. Thus $$\Big|\E_{x\sim U_n}[S_k(\tilde{g}_1(x), \ldots, \tilde{g}_m(x))] - \E_{x\sim \Dtagx}[S_k(\tilde{g}_1(x), \ldots, \tilde{g}_m(x))]\Big| \le \delta^{-2} \cdot \delta'_x \le \delta \le (\eps/n)^{C'}.$$
+
+		\item The expectation of $S_k(\tilde{g}_1(x), \ldots, \tilde{g}_m(x))$ on a uniformly chosen $x$ is $0$.	
+		\qedhere
+		\end{enumerate} 
+\end{proof}
+
+The next lemma combined with Claim~\ref{claim:symmetric-excellent} concludes the low-variance case, since it shows that with high probability, $T$ is excellent, and then $\Dtagx$ is an $(\eps/n^{40})$-PRG for $\prod_{i=1}^{m}{\tilde{f_i}}$ (for a sufficiently large choice of $C'$).
+
+\begin{lemma}
+If $T$ is excellent, then $\E_{x\sim \Dtagx}[	\prod_{i=1}^{m}{\tilde{f_i}}] = (\prod_{i=1}^{m}\mu_i) \pm (\eps/n)^{\Omega(C')}$.
+\end{lemma}
+\begin{proof}
+Let $x\sim \Dtagx$, 
+and let $E$ be the event that
+$|S_{\ell}(\tilde{g_1}(x), \ldots, \tilde{g_m}(x))| \le \frac{t^\ell}{\sqrt{\ell!}}$ 
+and 
+$|S_{\ell+1}(\tilde{g_1}(x), \ldots, \tilde{g_m}(x))| \le \frac{t^{\ell+1}}{\sqrt{(\ell+1)!}}$.
+Picking $t = \sigma^{0.01}$, and using Claim~\ref{claim:symmetric-excellent} the event $E$ happens with probability at least $1-\sigma^{\Omega(\ell)} \ge 1-(\eps/n)^{\Omega(C')}$.
+Assuming $E$ occurs, 
+ Theorem~\ref{thm:GY} gives
+$$\sum_{k=\ell}^{m} |S_{k}(\tilde{g_1}(x), \ldots, \tilde{g_m}(x))| \le 2\cdot (6et)^{\ell} \le \sigma^{\Omega(\ell)} \le (\eps/n)^{\Omega(C')}.$$
+Furthermore, for sets of smaller cardinality, i.e., for $k \in \{1,\ldots, \ell-1\}$, Claim~\ref{claim:symmetric-excellent} gives
+$$\Big|\E_{x\sim \Dtagx}[S_{k}(\tilde{g_1}(x), \ldots, \tilde{g_m}(x))]\Big| \le (\eps/n)^{C'} \qquad\text{and}\qquad\Big|\E_{x\sim \Dtagx}[S_{k}^2(\tilde{g_1}(x), \ldots, \tilde{g_m}(x))]\Big| \le 1\;.$$
+We would like to bound $|\E_{x\sim \Dtagx}[S_{k}(\tilde{g_1}(x), \ldots, \tilde{g_m}(x)) \cdot \one_{E}]|$ for $k\in \{1,\ldots, \ell-1\}$. Towards this end,
+we consider the expectation of $S_{k}(\tilde{g_1}(x), \ldots, \tilde{g_m}(x))$ by partitioning into the two cases depending on whether the event $E$ occurred or not.
+\begin{align*} \E_{x\sim \Dtagx}&[S_{k}(\tilde{g_1}(x), \ldots, \tilde{g_m}(x))] \\&= \E_{x\sim \Dtagx}[S_{k}(\tilde{g_1}(x), \ldots, \tilde{g_m}(x)) \cdot \one_{E}] + \E_{x\sim \Dtagx}[S_{k}(\tilde{g_1}(x), \ldots, \tilde{g_m}(x)) \cdot \one_{\bar{E}}]\\
+&= \E_{x\sim \Dtagx}[S_{k}(\tilde{g_1}(x), \ldots, \tilde{g_m}(x)) \cdot \one_{E}] \pm \sqrt{\E_{x\sim \Dtagx}[S_{k}^2(\tilde{g_1}(x), \ldots, \tilde{g_m}(x))] \cdot \Pr[\bar{E}]	\tag{Cauchy-Schwarz}}\\
+&= \E_{x\sim \Dtagx}[S_{k}(\tilde{g_1}(x), \ldots, \tilde{g_m}(x)) \cdot \one_{E}] \pm \sqrt{\Pr[\bar{E}]}\\
+&=\E_{x\sim \Dtagx}[S_{k}(\tilde{g_1}(x), \ldots, \tilde{g_m}(x)) \cdot \one_{E}] \pm (\eps/n)^{\Omega(C')}
+\end{align*}
+Thus, $|\E_{x\sim \Dtagx}[S_{k}(\tilde{g_1}(x), \ldots, \tilde{g_m}(x)) \cdot \one_{E}]| \le  (\eps/n)^{\Omega(C')}$ and we get 
+$$
+\E_{x\sim \Dtagx}\left[\prod_{i=1}^{m}\tilde{g_i}(x) \cdot \one_{E}\right] = \E_{x\sim \Dtagx}[\one_{E}] \pm  \sum_{k=1}^{m} |\E_{x\sim \Dtagx}[S_{k}(\tilde{g_1}(x), \ldots, \tilde{g_m}(x)) \cdot \one_{E}]| = 1 \pm (\eps/n)^{\Omega(C')}\;.$$
+Since the $\tilde{f_i}$'s and $\mu_i$'s are bounded in $[-1,1]$, we get 
+\begin{align*}
+\E_{x}\left[ \prod_{i}\tilde{f_i}\right] &= 
+\E_{x}\left[  \prod_{i}\tilde{f_i} \cdot \one_{E}\right] + \E_{x}\left[ \prod_{i}\tilde{f_i} \cdot \one_{ \neg E}\right]\\
+&= \left(\prod_{i}{\mu_i} \cdot \E_{x\sim \Dtagx}\left[ \prod_{i=1}^{m} \tilde{g_i}(x) \cdot \one_{E}\right]\right)  \pm \Pr[\neg E] \\
+&= \prod_{i}{\mu_i} \cdot \left(1\pm (\eps/n)^{\Omega(C')}\right)  \pm (\eps/n)^{\Omega(C')} =  \Big(\prod_{i}{\mu_i}\Big)   \pm (\eps/n)^{\Omega(C')}.\qedhere	
+\end{align*}
+\end{proof}
+
+\subsection{High-Variance Case}
+
+In the high-variance case, there exists a $\sigma \in (0,1]$ and an interval $I_\sigma = \{i: \Var[f_i]  \in (0.4\cdot\sigma^{1.1},\sigma]\}$ (the constant $0.4$ handles the case $\sigma=1$) satisfying:
+$$
+\sum_{i \in I_\sigma} \Var[f_i] > C\cdot \sigma^{-0.1}\cdot  \log^2(n/\eps)\;.
+$$
+In this case, the expected value of $\prod_{i=1}^m{f_i}$ under the uniform distribution is rather small:
+\begin{align*}
+\abs{\E\left[\prod_{i=1}^{m} f_i\right]}
+ = \prod_{i=1}^{m} |\E[f_i]|
+=  \prod_{i=1}^{m}{\sqrt{1-\var[f_i]}}
+\le e^{-\sum_{i=1}^{m}{\var[f_i]/2}} \le e^{-C\cdot \log^2(n/\eps)/2} \le \eps/2.
+\end{align*}
+Recall that the pseudorandom restriction samples a set $T$ according to some $\delta_T$-biased distribution $\D_p$ with marginals $p$, and a partial assignment to the bits in $T$ according to some $\delta_x$-biased distribution $\Dx$. 
+In the high variance case, it suffices to show that $\abs{\E_{T\sim \D_p, x\sim \Dx}\left[\prod_{i=1}^{m}{\tilde{f_i}(x)}\right]} \le \eps/2$.
+Fix $T, x$.  Denote by $f^T_{i,x}(y) = (f_{i})_{T|y}(x)$.
+Similarly to the calculation in the  case of the uniform distribution, we have
+\begin{align*}
+\abs{\prod_{i=1}^{m}{\tilde{f_i}(x)}} = \abs{\prod_{i=1}^{m}{\E_{y\sim U_{[n]\setminus T}}[f^T_{i,x}(y)]}}\le e^{-\sum_{i=1}^{m} \var[f^T_{i,x}]/2}
+\end{align*}
+Thus, it suffices to show that for most $T\sim \D_p$, $x\sim \Dx$ we have $\sum_{i=1}^{m} \var[f^T_{i,x}] \ge 10 \cdot \log(1/\eps)$.
+
+\begin{theorem}[Theorem~\ref{thm:main} - High Variance Case]\label{thm:main high var}
+	With probability $1-\eps/4$ over $T\sim \D_p$ and $x\sim \Dx$, it holds that  $\sum_{i\in I_{\sigma}}{\Var[f^T_{i,x}]} \ge 10 \cdot \log(1/\eps)$ .
+\end{theorem}
+
+\begin{proof}
+Denote by $\Tvar := \sum_{i\in I_{\sigma}}\var[f_i]$.
+By our assumption, $\Tvar \ge C \cdot \log^2(n/\eps) \cdot \sigma^{-0.1} \ge 5 \sigma^{-0.1}$.
+Since all functions in $I_{\sigma}$ have variance at least $0.4 \cdot \sigma^{1.1}$ we have 
+\begin{equation}\label{eq:Tvar vs m}
+|I_{\sigma}| \le  \Tvar \cdot \tfrac{1}{0.4} \cdot \sigma^{-1.1} \le \Tvar^{12}
+\end{equation}
+We remark that in this case, unlike the low-variance case, we do not know how to handle large $\sigma$ easily, so for the rest of the proof $\sigma$ can be anything between $2^{-1-b}$ and $1$.
+
+Fix $T$ and $x$. We expand $\var[f^T_{i,x}]$ 
+$$
+\var[f^T_{i,x}] = \E_{y\sim U_{[n]\setminus T}}[f^T_{i,x}(y)^2] - \E_{y\sim U_{[n]\setminus T}}[f^T_{i,x}(y)]^2 = 1-\tilde{f_i}(x)^2 \;.
+$$
+For any fixed $T$, using $\E[f_i] =\E[\tilde{f_i}]$ gives
+\begin{align*}
+	\E_{z\sim U_T} [\var[f^T_{i,z}]]   
+&= 1- \E[(\tilde{f_i})^2] 
+= (1-\E[f_i]^2) - (\E[(\tilde{f_i})^2] - \E[\tilde{f_i}]^2)
+= \var[f_i] - \var[\tilde{f_i}]
+\end{align*}
+
+\begin{claim}[Most $T$'s preserve variance in expectation]\label{claim:preserve_var}
+With probability at least $1-\eps/16$ over the choice of  $T \sim \D_p$, it holds that $\E_{z\sim U_T} \left[\sum_{i \in I_{\sigma}}{\Var[f^T_{i,z}]}\right] \ge \Tvar/2.$
+\end{claim}
+\begin{proof}
+Since 
+$\E_{z\sim U_T}[\var[f^T_{i,z}]] = \var[f_i] - \var[\tilde{f_i}]$, it suffices to show that with probability $1-\eps/16$ over the choice of $T\sim \D_p$ we have $\sum_{i} \var[\tilde{f_i}] \le \sum_{i} \var[f_i]/2$.
+To show that 
+$\sum_{i} \var[\tilde{f_i}]$ 
+is well-concentrated we analyze its $k$-th moment for $k = C'  \log(1/\eps)$ where $C'$ is a sufficiently large constant.
+\begin{align*}
+\E_{T\sim \D_p}\left[\Big(\sum_{i \in I_{\sigma}} \var[\tilde{f_i}]\Big)^{k}\right]
+= \sum_{i_1, i_2, \ldots, i_{k}\in I_{\sigma}} \E_{T}\left[\prod_{j=1}^{k} 	\var[\tilde{f_{i_j}}]\right]\;.
+\end{align*}
+Fix $i_1, \ldots, i_k \in I_{\sigma}$, (not necessarily distinct), then by Lemma~\ref{lemma:vars_prod}
+\begin{align*}
+\E_{T\sim \D_p}\left[\prod_{j=1}^{k} 	\var[\tilde{f_{i_j}}]\right] &\le   \E_{T\sim \Rp}\left[\prod_{j=1}^{k} 	\var[\tilde{f_{i_j}}]\right] + \delta_T	\cdot \prod_{j=1}^{k} 	\var[f_{i_j}]
+\end{align*}
+Overall, we get
+\begin{align*}\E_{T\sim \D_p}\left[\Big(\sum_{i\in I_{\sigma}} \var[\tilde{f_i}]\Big)^{k}\right] \le  \E_{T\sim \Rp}\left[\Big(\sum_{i\in I_{\sigma}} \var[\tilde{f_i}]\Big)^{k}\right] + \delta_T \cdot \Tvar^{k}\;.
+\end{align*}
+To bound $\E_{T\sim \Rp}[(\sum_{i=1}^{m} \var[\tilde{f_i}])^{k}]$
+we use the fact that by Theorem~\ref{thm:HC} 
+$$\E_{T \sim \Rp}[\var[\tilde{f_i}]] \le p \cdot \var[f_i] \le 0.1 \cdot \var[f_i]$$
+and then by Chernoff's bound 
+$\sum_{i\in I_{\sigma}} \var[\tilde{f_i}] \le 0.2 \cdot \Tvar$ 
+with probability at least $1-\exp(-\Omega(\Tvar))$.
+Since $\sum_{i} \var[\tilde{f_i}]$ is always upper bounded by $\Tvar$, the $k$-moment of the sum is at most
+$$(0.2 \cdot \Tvar)^{k} + (\Tvar)^{k} \cdot \exp(-\Omega(\Tvar)) \le 2(0.2 \cdot \Tvar)^{k}$$
+We get that 
+$\E_{T\sim \D_p}[(\sum_{i\in I_{\sigma}} \var[\tilde{f_i}])^{k}] \le 2(0.2 \cdot \Tvar)^{k} + \delta_T \cdot \Tvar^{k}$.
+Since $\delta_T \ll 2^{-4 k}$ this is at most 
+$3\cdot (0.2 \cdot \Tvar)^{k}$.
+Thus, using Markov's inequality, the probability that $ \sum_{i\in I_{\sigma}} \var[\tilde{f_i}]  \ge  0.5 \cdot \Tvar$ is at most $3\cdot (0.2/0.5)^{k} \le \eps/16$ which completes the proof.
+\end{proof}
+
+
+Let \begin{equation}\label{eq:def ell}
+	\ell \triangleq C'\cdot \log(n/\eps)/\log(|I_{\sigma}|)
+\end{equation}
+where $C'$ is a sufficiently large constant declared before Eq.~\eqref{eq:delta_T}. 
+Assume that $\ell$ is an even integer.
+Recall that $\delta = (\eps/n)^{-10C'} = |I_{\sigma}|^{-10 \ell}$.
+We again define $T$ to be a {\sf good} set if $\prod_{i\in R}\tilde{f_i}$ has spectral-norm at most $1/\delta$ for all sets $R\subseteq I_{\sigma}$ of size at most $\ell$. As in Claim~\ref{claim:good} the probability that $T$ is good is at least $1-(|I_{\sigma}|+1)^{\ell} \cdot O(\ell b w)^3 \cdot \delta \ge 1-\eps/16$.
+We define $T$ to be an {\sf excellent} set if $T$ is good and Claim~\ref{claim:preserve_var} holds for $T$. Then, $\Pr[T\text{~is excellent}] \ge 1-\eps/8$.
+\begin{claim}
+ If $T$ is a good set, then at most $\ell$ of the $\tilde{f_i}$'s have $L_1(\tilde{f_i}) \ge \delta^{-1/\ell}$.
+\end{claim}
+\begin{proof}
+	If $\tilde{f_{i_1}}, \ldots, \tilde{f_{i_\ell}}$ have
+	$L_1(\tilde{f_{i_j}})\ge \delta^{-1/\ell}$, then their product  has spectral-norm at least $\delta^{-1}$, since $L_1(\prod_{j=1}^{\ell}\tilde{f_{i_j}}) = \prod_{j=1}^{\ell} L_1(\tilde{f_{i_j}})$ for functions defined on disjoint variables.
+\end{proof}
+
+Fix an excellent set $T$. Let $G$ be the of indices $i\in I_{\sigma}$ with $L_1(\tilde{f_i})\le \delta^{-1/\ell}$. We show that with high probability over $x$, $\sum_{i\in G}{\var[f^T_{i,x}]} \ge 0.1 \cdot \Tvar$. We denote by 
+$$\error_i(x) := \var[f^T_{i,x}] - \E_{z \sim U}[\var[f^T_{i,z}]] = \var[f^T_{i,x}] - (\var[f_i] - \var[\tilde{f_i}]).$$
+Obviously $\E_{z\sim U}[\error_i(z)] = 0$ and $\error_i$ is bounded in $[-\sigma,1]$.
+Furthermore, we have that $$\error_i(x) = (1-\tilde{f_i}(x)^2) -(1 - \E_{z\sim U}[\tilde{f_i}(z)^2]) = \E_{z\sim U}[\tilde{f_i}(z)^2] - \tilde{f_i}(x)^2$$
+Thus, the error term have small spectral-norm since $L_1(\error_i) \le L_1(\tilde{f_i})^2$. We use this fact to bound 
+$\E_{x\sim \Dx}[ (\sum_{i\in G} \error_i(x))^{\ell}]$. (recall that $\ell$ is an even integer.)
+%\begin{claim}
+%	$$\E_{x\sim \Dx}\Big[ \big(\sum_{i\in G} \error_i(x)\big)^{\ell}\Big] \le \E_{z\sim U}\Big[ \big(\sum_{i\in G} \error_i(x))\big)^{\ell}\Big]+ \delta_x \delta^{-2} \cdot |G|^{\ell}.$$
+%\end{claim}
+%\begin{proof}
+%	The spectral-norm of $(\sum_{i\in G} \error_i(x))^{\ell}$ is at most $(|G| \cdot \delta^{-2/\ell})^{\ell}  = |G|^{\ell} \cdot \delta^{-2}$. Thus, any $\delta_x$ distribution fools $(\sum_{i\in G} \error_i(x))^{\ell}$ with error at most $\delta_x \cdot |G|^{\ell} \cdot \delta^{-2}$.
+%\end{proof}
+%
+%\begin{claim}
+%	$\E_{z\sim U}[ (\sum_{i\in G} \error_i(z))^{\ell}] \le  
+%	\max\{\ell^{\ell}, (\ell \cdot \Tvar)^{\ell/2}\}$
+%\end{claim}
+%\begin{proof}
+%Note that $\{\error_i(z)\}_{i\in G}$ are independent random variables, where each $\error_i(z)$ is bounded in $[-\var[f_i],1]$ with mean zero, and hence $\var[\error_i] \le \var[f_i]$ (See Lemma~\ref{lemma:var}). We apply Lemma~\ref{lemma:tail_bounds} to complete the proof.
+%\end{proof}
+%
+%Note that $\ell \le \sqrt{\ell \cdot \Tvar}$ making the upper bound on $\E_{z\sim U}[ (\sum_{i\in G} \error_i(z))^{\ell}]$  at most $\left( \ell \cdot \Tvar\right)^{\ell/2}$.
+%The upper bound with respect to $x\sim \Dx$ is at most $$\E_{x\sim \Dx}\Big[ \big(\sum_{i\in G} \error_i(x)\big)^{\ell}\Big] 
+%\;\le\;  \left(\ell  \cdot  \Tvar\right)^{\ell/2} 
+%	+ m^{\ell} \delta^{-2} \delta_x
+%\;\le\; 2\cdot \left(\ell  \cdot  \Tvar\right)^{\ell/2}\;.$$
+\begin{claim}\label{claim:small l-moment err}
+	$$\E_{x\sim \Dx}\Big[ \big(\sum_{i\in G} \error_i(x)\big)^{\ell}\Big] \le 2 \cdot (\ell \cdot \Tvar)^{\ell/2}.$$
+\end{claim}
+\begin{proof}
+	The spectral-norm of $(\sum_{i\in G} \error_i(x))^{\ell}$ is at most $(|G| \cdot \delta^{-2/\ell})^{\ell}  = |G|^{\ell} \cdot \delta^{-2}$. Thus, any $\delta_x$-biased distribution fools $(\sum_{i\in G} \error_i(x))^{\ell}$ with error at most $\delta_x \cdot |G|^{\ell} \cdot \delta^{-2}$ and we get
+	$$
+	\E_{x\sim \Dx}\Big[ \big(\sum_{i\in G} \error_i(x)\big)^{\ell}\Big] \le \E_{z\sim U}\Big[ \big(\sum_{i\in G} \error_i(x))\big)^{\ell}\Big]+ \delta_x \cdot |G|^{\ell} \cdot \delta^{-2}.
+	$$
+	
+	To bound
+	$\E_{z\sim U}[ (\sum_{i\in G} \error_i(z))^{\ell}]$ we use Lemma~\ref{lemma:tail_bounds}.
+	We observe that $\{\error_i(z)\}_{i\in G}$ are independent random variables, where each $\error_i(z)$ is bounded in $[-\var[f_i],1]$ with mean zero, and hence $\var[\error_i] \le \var[f_i]$ (See Lemma~\ref{lemma:var}). Applying Lemma~\ref{lemma:tail_bounds} gives
+	$$
+	\E_{z\sim U}[ (\sum_{i\in G} \error_i(z))^{\ell}] \le  
+	\max\{\ell^{\ell}, (\ell \cdot \Tvar)^{\ell/2}\}.$$
+
+Since $\ell \le \sqrt{\ell \cdot \Tvar}$, the upper bound on $\E_{z\sim U}[ (\sum_{i\in G} \error_i(z))^{\ell}]$ is at most $\left( \ell \cdot \Tvar\right)^{\ell/2}$.
+Finally, the upper bound with respect to $x\sim \Dx$ is at most \[
+\E_{x\sim \Dx}\Big[ \big(\sum_{i\in G} \error_i(x)\big)^{\ell}\Big] 
+\;\le\;  \left(\ell  \cdot  \Tvar\right)^{\ell/2} 
+	+ \delta_x \cdot |G|^{\ell} \cdot \delta^{-2}
+\;\le\; 2\cdot \left(\ell  \cdot  \Tvar\right)^{\ell/2}\;.\qedhere
+\]
+\end{proof}
+%
+Using Markov's Inequality and Claim~\ref{claim:small l-moment err} gives \begin{align*}
+ \Pr_{x\sim\Dx} \left[\Big|\sum_{i\in G} \error_i(x)\Big| \ge \Tvar / 4\right]
+ \le 2\cdot \left(\frac{\sqrt{\ell \cdot \Tvar}}{\Tvar/4}\right)^{\ell} \le O(\sqrt{\ell/\Tvar})^{\ell}\le O(1/\Tvar)^{\ell/4}\;.
+ \end{align*}
+using $\Tvar \ge \Omega(\log^2(n/\eps))$ and $\ell \le O(\log(n/\eps))$ in the last inequality.
+Furthermore, using Eqs.~\eqref{eq:Tvar vs m} and \eqref{eq:def ell}: $O(1/\Tvar)^{\ell/4} \le \abs{I_{\sigma}}^{-\Omega(\ell)} \le (\eps/n)^{\Omega(C')} \le \eps/8$.
+In the complement event,
+$$
+\sum_{i\in G} \var[f^T_{i,x}] =  \sum_{i\in G}(\E_{z}[\var[f^T_{i,z}]] + \error_i(x)) \ge \Tvar/2 - \ell  - \Tvar/4 \ge 0.1 \cdot \Tvar.
+$$
+Since $\Tvar \ge \Omega(\log^2(n/\eps))$, we get that with  probability at least $1-\eps/4$ over $T\sim \D_p$ and $x\sim \Dx$,  $\sum_{i} \var[f^T_{i,x}]  \ge 10 \log(1/\eps)$. (End of Proof of Theorem~\ref{thm:main high var})
+\end{proof}

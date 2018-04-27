@@ -1,0 +1,418 @@
+\newcommand{\VBad}{\mathsf{VarBad}}
+\newcommand{\V}{\mathsf{Var}}
+\newcommand{\Bad}{\mathsf{Bad}}
+\newcommand{\Good}{\mathsf{Good}}
+
+
+\newcommand{\GMany}{\mathbf{G_{\oplus Many}}}
+\newcommand{\GXOR}{\mathbf{GXOR}}
+
+
+
+
+\section{Assigning all the variables: a pseudorandom generator for the XOR of short ROBPs}\label{sec:assign_all}
+
+In Theorem~\ref{thm:main}, we proved that we can pseudorandomly assign $p$-fraction of the coordinates of $f(x) = \prod_{i=1}^{m}{f_i(x)}$, while maintaining its acceptance probability up to an additive error  of $\eps$, using $\tilde{O}(\log(n/\eps)\cdot \log(b))$ random bits.
+In this section, we will construct a pseudorandom generator $\eps$-fooling $f$, by applying Theorem~\ref{thm:main} $\poly\log\log(n/\eps)$ times, combined with Lovett's \cite{Lovett08} or Viola's \cite{Viola08} pseudorandom generator for low-degree polynomials, and CHRT's pseudorandom generator for constant-width ROBPs~\cite{CHRT17}. Our main result is:
+\begin{thm}\label{thm:GXOR}
+Let $n,w,b\in \N$, $\eps>0$. There exists an explicit pseudorandom generator that $\eps$-fools any XOR of ROBPs of  width-$w$ and length-$b$ (defined on disjoint sets of variables),using seed-length $O(\log(b) + \log\log(n/\eps))^{2w+2} \cdot \log(n/\eps)$.
+\end{thm}
+
+\paragraph{Assigning $0.9999$-fraction of the variables.}
+The first step is rather standard. 
+By making $t$ recursive calls to Theorem~\ref{thm:main} we can assign all but $(1-p)^t \le e^{-pt}$ fraction of the coordinates while maintaining the acceptance probability.
+Note that we rely on the fact that under restrictions, the restricted function is still of the form $\prod_{i=1}^{m}{g_i(x)}$ where each $g_i$ is a ROBP of width $w$ that depends on at most $b$ bits (in other words, the class of functions we are trying to fool is closed under restrictions).
+Setting $t = O(1/p)$, we can assign $0.9999$ fraction of the inputs bits while changing the acceptance probability by at most $\eps/n$.
+
+\begin{claim}\label{claim:assigning-0.9999}
+Let $f = \prod_{i=1}^{m} f_i(x)$, with block-length $b$.
+Then, there is a pseudorandom restriction fixing each variable with probability $0.9999$, using at most $
+ O\big(\log(b) +\log\log(n/\eps)\big)^{2w+1} \cdot \log(n/\eps)$ random bits, and changing the acceptance probability by at most $(\eps/n)$.
+
+%Furthermore, any fixed set $S\subseteq[n]$ of  $k \le 5\log(n/\eps)$ variables remains alive with probability at most $2^t \cdot 0.0001^k$.
+Furthermore, any fixed set $S\subseteq[n]$ of  $k \le 5\log(n/\eps)$ variables remains alive with probability at most $2 \cdot 0.0001^k$.
+\end{claim}
+\begin{proof}[Proof Sketch]
+Apply Theorem~\ref{thm:main} with error $\eps/n^2$ for $t = \log(0.0001)/\log(1-p) = O(1/p)$ times iteratively, with independent random bits per each iteration. This changes the probability of acceptance by at most $(\eps/n^2)\cdot t \le \eps/n$ and keeps each variable alive with probability $(1-p)^{t} =0.0001$.
+The amount of random bits used to sample the restriction is 
+$$O(p^{-1}
+ \cdot w  \log (n/\eps)  (\log\log(n/\eps) +  \log(b))
+ \le 
+ O\big(\log(b) +\log\log(n/\eps)\big)^{2w+1} \cdot \log(n/\eps).$$
+
+Next, we show the furthermore part. Let $S$ be a fixed set of $k$ variables. By Claim~\ref{claim:inclusion-exclusion} the probability that $S$  remains alive under the $t$ pseudorandom restrictions is at most $((1-p)^{k} + 2^{k}\delta_T)^t$. 
+Recall that $\delta_T = (n/\eps)^{\omega(1)}$.
+For $k \le 5 \log(n/\eps)$, we get 
+$((1-p)^{k} + 2^{k} \delta_T)^t \le (1-p)^{kt} \cdot (1+4^{k}\delta_T)^{t} \le 2\cdot 0.0001^{k}$.
+\end{proof}
+
+
+We would like to claim that $f = \prod_{i=1}^{m}f_i$ simplifies after assigning $0.9999$ of the coordinates. 
+For a particular function $f_i$, with high probability, at least $1-1/32^b$, the block length decreases under a random restriction by a factor of $2$.
+This is due to the fact that on expectation  at most $0.0001\cdot b$ of the variables will survive, and we can apply Chernoff's bound.
+Now, if $m\le 16^b$, we can apply a union bound and get that with high probability the block-length decreases by a factor of $2$ in all functions $f_1, \ldots, f_m$ simultaneously.
+We seem to have been making progress, going from block-length $b$ to block-length $b/2$, and we might hope that $\log(b)$ iterations of Claim~\ref{claim:assigning-0.9999} are enough to get a function that depends on $O(1)$ many variables (which is easy to fool). 
+But, in order to carry the argument, even in the second step, we need to be able to afford the union bound on all functions. 
+Ideally, the number of functions that are still alive also decreases from at most $16^b$ to at most $16^{b/2}$, and a similar union bound works replacing $b$ by $b/2$. We can continue similarly as long as in each iteration the block-length decreases by half and the number of functions by a square root.
+
+We run into trouble if at some iteration we have more than $16^{b'}$ functions of block-length $b'$.
+The first observation is that in this case the total variance of the functions is extremely high, exponential in $b'$. Recall that the expected value of the product is exponentially small in the total variance. This means that the expected value of the product is doubly-exponentially small in $b'$.
+The second observation is that under $(1-\alpha)$-random restrictions, on average, the total variance decreases by a factor of $\alpha$.
+Hence, we aim to apply a pseudorandom restriction assigning $(1-\exp(-b'))$ fraction of the variables alive, while keeping the total variance higher than $\log(n/\eps)$. This restriction is extremely aggressive, keeping only a polynomial fraction of the remaining variables alive (compared to say a constant fraction in Claim~\ref{claim:assigning-0.9999}).
+However, we claim that in this case, such a restriction maintains the total variance high and thus the expected value of $\prod_{i=1}^{m}{f_i(x)}$ small (at most $\poly(\eps/n)$) in absolute value.
+
+The nice thing about these ``aggressive pseudorandom restrictions'' is that they keep variables alive with such small probability that with high probability each function $f_i$ will depend on at most $O(1)$ variables after the restriction, except for a small number of functions covering at most $O(\log(n/\eps))$ ``bad variables''. This will allow us to fool the restricted function using Lovett's \cite{Lovett08} or Viola's \cite{Viola08} pseudorandom generator for low-degree polynomials.
+In the next section, we explain how to handle this case in more details. 
+Then, in Section~\ref{sec:4.2} we describe as a thought experiment a ``fake PRG'': an adaptive process that fools the XOR of short ROBPs, but depends on the function being fooled. In Section~\ref{sec:4.3} we show how to eliminate the adaptiveness and construct a true PRG for this class of functions. 
+
+\subsection{PRG for the XOR of many functions with block-length $b$}\label{sec:4.1}
+
+Let $\mathcal{F}_{b,n,t}$ be the class of functions of the form
+$f(x) = f_0(x) \cdot \prod_{i=1}^{m}{f_i(x)}$
+where $f_0, \ldots, f_m$ are Boolean functions on disjoint sets of variables, $f_0$ (the `junta') depends on at most $t$ variables, $f_1, \ldots, f_m$ are {\bf non-constant} and depend on at most $b$ variables and 
+$16^b \le m \le 2\cdot 16^{2b}$.
+
+\begin{lemma}\label{lemma:Gb}
+There exists a constant $C>0$ such that the following holds.
+For all $n,b,t$ such that  $C\cdot \log\log(n/\eps) \le b \le \log(n)$, there exists an explicit pseudorandom generator $\GMany(b,n,t,\eps):\pmone^{O(t + \log n/\eps)} \to \pmone^n$ that $\eps$-fools $\mathcal{F}_{b,n,t}$.
+\end{lemma}
+
+%The algorithm will use a universal large enough constant $C'\ge C$ in its definition.
+\begin{algorithm}[H]
+\caption{The Pseudorandom Generator $\GMany(b,n,t,\eps)$} 
+\begin{algorithmic}[1]
+\Require{A block-length $b$, the output length $n$, a junta-size $t$, an error parameter $\eps\in (0,1)$}
+\State Set $x:= 1^n$
+\State Pick $T\subseteq [n]$ using a $(\eps/n)^{10C}$-biased distribution with marginals $2^{-b}$.
+\State Assign coordinates of $x$ in $[n]\setminus T$ using a $(\eps/n)^{10C}$-biased distribution.
+\State Assign coordinates of $x$ in $T$ using Viola's generator with error $\frac{\eps}{4} \cdot (\frac{\eps}{n})^{C} \cdot 2^{-t}$ and degree~$16$.
+\State \Return $x$.
+\end{algorithmic}\label{test:1}
+\end{algorithm}
+
+\begin{lemma}\label{lemma:aggressive-real}
+Let $C>0$ be a sufficiently large constant.
+Let $C\cdot \log\log(n/\eps) \le b \le \log(n)$ be some integer.
+Let $f_1, \ldots, f_m$ be non-constant Boolean functions that depend on disjoint sets of at most $b$ variables each.
+Assume $m \ge 16^b$.
+Suppose $T$ is $(\eps/n)^{10C}$-biased distribution with marginals $2^{-b}$.
+Suppose $x$ is sampled from a $(\eps/n)^{10C}$-biased distribution.
+Then, with  probability at least $1-(\eps/n)^{C/4}$, at least $4^b$ of the functions $(f_i)_{T|x}$ will be non-constant. 
+\end{lemma}
+
+%\begin{lemma}[Lemma~\ref{lemma:aggressive-real}, restated]
+%Let $C>0$ be a sufficiently large constant.
+%Let $C\cdot \log\log(n/\eps) \le b \le \log(n)$ be some integer.
+%Let $f_1, \ldots, f_m$ be non-constant Boolean functions that depend on disjoint sets of at most $b$ variables each.
+%Assume $m \ge 16^b$.
+%Suppose $T$ is $(\eps/n)^{10C}$-biased distribution with marginals $2^{-b}$.
+%Suppose $x$ is sampled from a $(\eps/n)^{10C}$-biased distribution.
+%Then, with  probability at least $1-(\eps/n)^{C/4}$, at least $4^b$ of the functions $(f_i)_{T|x}$ will be non-constant. 
+%\end{lemma}
+\begin{proof}
+Without loss of generality $m = 16^b$.
+Let $k = C \log(n/\eps)/b$, and note that $k \le 2^b$ since $b\ge C \cdot \log \log(n/\eps)$ for a sufficiently large constant $C>0$.
+
+Let $B_1, \ldots, B_m\subseteq [n]$ be the disjoint sets of variables on which $f_1, \ldots, f_m$ depend respectively.
+For any function $f_i: \pmone^{B_i} \to \pmone$, there exists a sensitive pair of inputs $(\alpha^{(i)},\beta^{(i)}) \in \pmone^{B_i}$ such that $\alpha^{(i)}$ and $\beta^{(i)}$ differ in exactly one coordinate $j_i$ and such that $f_i(\alpha^{(i)}) \neq f_i(\beta^{(i)})$.
+We say that the sensitive pair ``survives'' the random restriction defined by $(T,x)$ if both $\alpha^{(i)}$ and $\beta^{(i)}$ are consistent with the partial assignment defined by the restriction (i.e., if they agree with $x$ on $B_i \setminus T$).
+For each function $f_1,\ldots, f_m$ fix one sensitive pair $(\alpha^{(1)}, \beta^{(1)}), \ldots, (\alpha^{(m)}, \beta^{(m)})$ and denote by $\cE_1, \ldots, \cE_m$ the events that these sensitive pairs survive.
+Next, we claim that $\cE_1, \ldots, \cE_m$ are almost $k$-wise independent.
+We compare them to the events $\cE'_1, \ldots, \cE'_m$ that indicate whether the sensitive pairs survive under a truly random restriction sampled from $\mathcal{R}_{2^{-b}}$.
+Denote by $p_i = \Pr(\cE'_i)$.
+Observe that $p_i \ge 2^{1-2b}$ since in order for the pair to survive it is enough that the sensitive coordinate remains alive (happens with probability $2^{-b}$) and that the partial assignment on the remaining coordinates agrees with $\alpha^{(i)}$ (happens with probability at least $2^{1-b}$). %Let $\cE'_1, \ldots, \cE'_m$ be i.i.d. random events happening with probability $p = 2^{1-2b}$.
+Then,
+	$$
+	\E\left[\Big(\sum_{i=1}^{m}{(\one_{\cE_i}-p_i)}\Big)^k\right] \le 
+		\E\left[\Big(\sum_{i=1}^{m}(\one_{\cE'_i}-p_i)\Big)^k\right] + (2m)^k \cdot \max_{K\subseteq [m]: |K|\le k} \left|\E[\prod_{i\in K} \one_{\cE_i}] - \E[\prod_{i\in K} \one_{\cE'_i}]\right|.$$ 
+	We upper bound the first and second summands separately. 
+	By Lemma~\ref{lemma:tail_bounds} and Lemma~\ref{lemma:var}, the first summand is upper bounded by $\max\{k^k, (Vk)^{k/2}\}$ where 
+	$$
+	V := \sum_{i=1}^{m}{p_i}.
+	$$ 
+	Since $V \ge m\cdot 2^{1-2b} = 2\cdot 4^b  \ge k$, the first summand is upper bounded by $(Vk)^{k/2}$.
+		
+	Next, we upper bound the second summand. By Vazirani's XOR lemma, since $x$ is $(\eps/n)^{10C}$-biased, we have that the marginal distribution of
+	 any set of at most $k\cdot b$ bits in $x$ is $(\eps/n)^{10C} \cdot 2^{kb/2}$-close to uniform in statistical distance.
+	Since $T$ is $(\eps/n)^{10C}$-biased with marginals $2^{-b}$, using Claim~\ref{claim:inclusion-exclusion} we have that the marginal distribution on any set of at most $k$ coordinates in $T$ is $(\eps/n)^{10C} \cdot 4^{k}$-close in statistical distance to the distribution sampled according to $\mathcal{R}_{2^{-b}}$.
+	Thus, $|\E[\prod_{i\in K} {\one_{\cE_i}}] - \E[\prod_{i\in K} {\one_{\cE'_i}}]| \le (2^{kb/2} +4^{k}) \cdot (\eps/n)^{10C} \le 2^{kb/2+1} \cdot (\eps/n)^{10C}$ and we get 
+	$(2m)^{k} \cdot 2^{kb/2+1} \cdot (\eps/n)^{10C}\le 1$.
+	
+	Combining the bounds on both summands we get
+	$$
+	\E\left[\Big(\sum_{i=1}^{m}{(\one_{\cE_i}-p_i)}\Big)^k\right] 
+	\;\le\; 
+	(Vk)^{k/2} + 1 
+	\;\le\; 
+	2\cdot (Vk)^{k/2}.
+	$$
+	Using $V = \sum_{i=1}^{m} p_i$ we get 
+	$$\Pr\left[\sum_{i=1}^{m}\one_{\cE_i} \le V/2 \right] \le 
+	 \Pr\left[\Big(\sum_{i=1}^{m}{(\one_{\cE_i}-p_i)}\Big)^k  \ge (V/2)^k \right]  \le 2(Vk)^{k/2} \cdot (V/2)^{-k}$$
+Using $V \ge 2\cdot 4^b$ and $k\le 2^b$ we get $\Pr\left[\sum_{i=1}^{m}\one_{\cE_i} \le V/2 \right] \le 2(4k/V)^{k/2} \le 2\cdot(2/2^b)^{k/2}\le  (\eps/n)^{C/4}$.
+In the complement event, at least $V/2 \ge 4^b$ of the functions $(f_1)_{T|x}, \ldots, (f_m)_{T|x}$ are non-constant.
+\end{proof}
+
+%We defer the proof of Lemma~\ref{lemma:aggressive-real} to Appendix~\ref{sec:aggressive}.
+
+\begin{lemma}\label{lemma:low-deg}
+Let $f: \F_2^n \to \pmone$.
+Suppose $f(x) = h(x) \cdot (-1)^{g(x)}$ where $h$ is a $k$-junta 
+and $g$ is a polynomial of degree-$d$ over $\F_2$.
+	If $\D$ fools degree-$d$ polynomials over $\F_2$ with error $\eps$, then $\D$ fools $f$ with error $\eps \cdot 2^{k/2}.$
+\end{lemma}
+\begin{proof}
+Let $J$ be the set of variables on which $h$ depends.
+Using the Fourier transform of $h$:
+$h(x) = \sum_{S \subseteq J} \hat{h}(S) \cdot (-1)^{\sum_{i\in S} x_i}$
+we write $f$ as
+$f(x) = \sum_{S \subseteq J} \hat{h}(S) \cdot (-1)^{\sum_{i\in S} x_i + g(x)}$.
+Note that $\sum_{i\in S} x_i + g(x)$ is a polynomial of degree-$d$ over $\F_2$ as well, thus we get
+\begin{align*} \left|\E_{x\sim U}[f(x)]-\E_{x\sim \D}[f(x)]\right| 
+&\le \sum_{S}|\hat{h}(S)| \cdot 
+\Big|\E_{x\sim U}[(-1)^{\sum_{i\in S} x_i + g(x)}] - \E_{x\sim \D}[(-1)^{\sum_{i\in S} x_i + g(x)}]\Big| \\
+&\le L_1(h) \cdot \eps \le 2^{k/2} \cdot \eps\;.\qedhere\end{align*}
+\end{proof}
+
+
+\begin{proof}[Proof of Lemma~\ref{lemma:Gb}]
+First note that $f$ has very small expectation under the uniform distribution
+$$
+\left|\E_{z\sim U}\Big[f_0(z) \cdot \prod_{j=1}^{m} f_j(x)\Big]
+\right| \le (1-2^{-b})^{16^{b}} \ll \frac{\eps}{4}.
+$$
+using the assumption $b\ge C \log \log(n/\eps)$.
+Thus, we need to maintain  low-expectancy under the pseudorandom assignment.
+By Lemma~\ref{lemma:aggressive-real}, with probability at least $1-(\eps/n)^{C/4}\ge 1-\frac{\eps}{100}$ after the aggressive random restriction at least $4^{b}$ of the functions $f_1, \ldots, f_m$ remain non-constant. Since $b\ge C \log\log(n/\eps)$ we maintained the low-expectancy under aggressive random restrictions. That is, whenever $4^{b}$ of the functions $f_1, \ldots, f_m$ remain non-constant under restriction, the expected value of the restricted function under the uniform distribution is at most $(1-2^{-b})^{4^b} \ll \eps/4$ in absolute value.
+
+Furthermore, we wish to show that with high probability, except for a set of at most $C\log (n/\eps)$ ``bad variables'' all functions have block-length at most $16$.
+Recall that there are at most $2\cdot 16^{2b}$ functions.
+The probability that any particular $k$ variables survive is at most $2^{-b k} + (\eps/n)^{10C}$.
+Pick $k = C \log(n/\eps)/b \le C \log(n/\eps)$.
+The probability that at least $k$ variables in at most $\ell$ functions survive is 
+$$
+\binom{2\cdot 16^{2b}}{\ell} \cdot \binom{\ell \cdot b}{k} \cdot (2^{-b k} + (\eps/n)^{10C})
+\le 2 \cdot 2^{\ell + 9b\ell - bk} \le 2^{10b\ell-bk}
+$$
+If $\ell \le k/16$, then this probability is at most $2^{-6bk/16} = (\eps/n)^{6C/16} \ll \frac{\eps}{100}$.
+This means that, with high probability, there are less than $k$ variables from all functions with more than $16$ effective variables remaining.
+Otherwise, there would have been $\ell \le k/16$ functions accountable to a total number of more than $k$ variables that remained alive and effective, under the restriction.
+
+Overall, with probability at least $1-\eps/50$ we are left with the XOR of a small-junta, on at most $t + C\log(n/\eps)$ variables, and an XOR of at least $4^b$ non-constant functions on at most $16$ variables (i.e., a degree $16$ polynomial). Moreover, the restricted function has expected value at most $\eps/4$ in absolute value under the uniform distribution.
+Using Claim~\ref{lemma:low-deg} we get that Viola's~\cite{Viola08} or Lovett's~\cite{Lovett08} PRG for low-degree polynomials $\eps/4$-fools the remaining function. Combining all estimates we get that the expected value of the restricted function under our distribution is at most $3\eps/4$ in absolute value which completes the proof.
+\end{proof}
+
+\subsection{A Thought Experiment}\label{sec:4.2}
+We are ready to describe the pseudo-random restriction process in full detail.
+We start by describing a process that iteratively ``looks'' at the restricted functions in order to decide which pseudorandom restriction to apply next: the one described in Lemma~\ref{claim:assigning-0.9999} or the one from Lemma~\ref{lemma:aggressive-real}.
+This ultimately defines a decision tree of random restrictions.
+We then show in Section~\ref{sec:4.3} how to transform the adaptive process into a non-adaptive pseudorandom generator that (by definition) does not depend on the function it tries to fool.
+Namely, we would generate a pseudorandom string that  fools the function no matter what path was taken in the decision tree.
+
+
+We start with $m \le n$ blocks of length $b$.
+We assume that $m \le 16^b$ (if not set $b= \log_{16}(m)$).
+\begin{algorithm}[H]
+\caption{an ``adaptive pseudorandom generator''} 
+\begin{algorithmic}[1]
+\For{$i=0,1,\ldots$} 
+\State Let $b_i = b/2^i$.
+\If{$b_i \le C\log \log(n/\eps)$} 
+apply CHRT's PRG on the remaining coordinates, and Halt!
+\EndIf
+\If{more than $16^{b_i}$ of the restricted functions are non-constant and depend on at most $b_i$ variables} 
+apply $\GMany(b_i,10\log(n/\eps),n,\eps/2)$ from Lemma~\ref{lemma:Gb} on the remaining variables, and Halt!
+\Else{ apply the pseudorandom restriction from Lemma~\ref{claim:assigning-0.9999} on the remaining variables.}
+\EndIf
+\EndFor
+\end{algorithmic}\label{alg:adaptive}
+\end{algorithm}
+
+Next, we show that the process yields a pseudorandom string fooling $f = \prod_{i=1}^m{f_i(x)}$.
+First, note that the process either stops at Step 3 or at Step 4. In both cases we assign all the variables according to some pseudorandom generator, hence all the variables will be assigned by the end of the process.
+
+For $i=0,1, \ldots, $.
+Let $T_i$ be the set of coordinates that remain alive at the beginning of the $i$-th iteration.
+Denote by $f_j^{(i)}$ the $j$-th function under the restriction at the beginning of the $i$-th iteration. 
+Define $\V[f_j^{(i)}]$ to be the set of variables that affect the output of $f_j^{(i)}$.
+For example if $f_j^{(i)}$ is a constant function, then $\V[f_j^{(i)}] = \emptyset$.
+
+Let $\Good_i = \{j:  1 \le |\V[f_j^{(i)}]| \le b_i\}$ be the set of functions that depend on some but not more than $b_i$ variables, $\Bad_i = \{j:  |\V[f_j^{(i)}]| > b_i\}$ be the set of functions that depend on more than $b_i$ variables
+%. Let $\Good_{\le i} = \bigcap_{i'\le i}\Good_{i'}$, $\Bad_{\le i}= \bigcup_{i'\le i} \Bad_{i'}$ 
+and  $\VBad_{i} = \bigcup_{j\in \Bad_{i} }{\V[f_j^{(i)}]}$.
+
+\begin{claim}\label{claim:VBad}
+Let $b_i > C\log \log(n/\eps)$.
+Suppose $|\VBad_{i}| \le 10 \log(n/\eps)$ and $|\Good_{i}| \le 16^{b_{i}}$.
+Then, with probability at least $1-(\eps/n)$ 
+we have $|\VBad_{(i+1)}| \le 10 \log(n/\eps)$.
+\end{claim}
+\begin{proof}
+Under the assumptions we reach Step 5 in Algorithm~\ref{alg:adaptive}. We show that:
+\begin{enumerate}
+	\item With probability at least $1-\frac{1}{2}(\eps/n)$, at most $5\log(n/\eps)$ of the variables in $\VBad_{i}$ remain alive in Step 5.
+	\item With probability at least $1-\frac{1}{2}(\eps/n)$, at most $5 \log(n/\eps)$ new variables are added to $\VBad_{(i+1)}$.
+\end{enumerate}
+Both claims rely on the fact that  any set of $k \le 5 \log(n/\eps)$ variables remain alive under the pseudorandom restriction in Lemma~\ref{claim:assigning-0.9999} with probability at most $2\cdot 0.0001^k$.
+
+%Both claims rely on the fact that for any set of $k \le 5 \log(n/\eps)$ variables, the probability that all of them survive the pseudorandom restriction in Lemma~\ref{claim:assigning-0.9999} is at most $2\cdot 0.0001^k$.
+
+This  first item follows since the probability that more than $5\log(n/\eps)$ variables in $\VBad_i$ survive is at most 
+$$\binom{10\log(n/\eps)}{5\log(n/\eps)} \cdot 2\cdot0.0001^{5\log(n/\eps)} \le \tfrac{1}{2} (\eps/n).$$
+
+As for the second item, we start with the case where $b_i \le 2\log(n/\eps)$.
+Assume that more than $5\log(n/\eps)$ new variables were added to $\VBad_{(i+1)}$. 
+This implies that there is a set of $k = \lceil{5\log(n/\eps)/(b_i/2)\rceil}$ good functions in step $i$ that are accountable to at least $5\log(n/\eps)$ bad variables in step $i+1$.
+The latter event happens with probability at most 
+$$\binom{16^{b_i}}{k} \cdot \binom{k b_i}{5\log(n/\eps)} \cdot 2\cdot 0.0001^{5\log(n/\eps)} \le 32^{b_i k} \cdot 2 \cdot 0.0001^{5\log(n/\eps)} \le \tfrac{1}{2} (\eps/n)$$
+(where we used $k b_i \le b_i+10\log(n/\eps) \le 12\log(n/\eps)$)
+which finishes the case $b_i \le 2\log(n/\eps)$.
+
+In the case where $b_i > 2\log(n/\eps)$, we show that with high probability all good functions remain good.
+For each individual function, using Markov's inequality
+\begin{align*}\Pr[ |\V[f^{(i+1)}_j]| \ge b_i/2] 
+&\le \frac{\E\left[\binom{|\V[f^{(i+1)}_j]|}{ \log (n/\eps)}\right]}{\binom{b_i/2}{\log(n/\eps)}}
+\le 2\cdot 0.0001^{\log n/\eps} \cdot \frac{\binom{b_i}{\log(n/\eps)}}{\binom{b_i/2}{\log(n/\eps)}}\\
+&\le 2\cdot  0.0001^{\log n/\eps} \cdot \frac{(e \cdot b_i/ \log(n/\eps))^{\log(n/\eps)}}{((b_i/2)/ \log(n/\eps))^{\log(n/\eps)}} \\
+&= 2\cdot(0.0001 \cdot e\cdot 2)^{\log(n/\eps)} \le \tfrac{1}{2} (\eps/n^2).\end{align*}
+Thus, we can apply a union bound and show that all good functions remain good with  probability at least $1-\frac{1}{2}(\eps/n)$.
+\end{proof}
+
+
+Say the process finished. 
+We shall assume that $|\VBad_i| \le 10 \log(n/\eps)$ for every iteration $i$ until the process stopped. By Claim~\ref{claim:VBad} this happens with probability at least $1-\log(b)\cdot(\eps/n) \ge 1-\eps/2$ by applying a union bound on the at most $\log(b)$ iterations.
+We wish to show that we constructed a pseudorandom string fooling $f$. We consider two cases:
+\begin{enumerate}
+	\item 
+	We stopped on Step~3 at some iteration $i$. If $i=0$ then $m \le 16^{b_0} \le \poly\log(n/\eps)$ and at most $\poly\log(n/\eps)$ variables remain that affect the functions $f_{j}^{(i)}$.
+	 %In this case, by Claim~\ref{claim:VBad}, with high probability, 
+	 Otherwise, since $|\Good_{(i-1)}| \le 16^{2b_i} \le \poly\log(n/\eps)$ and $|\VBad_{(i-1)}| \le 10 \log(n/\eps)$, at most $\poly\log(n/\eps)$ variables remain that affect the functions $f_{j}^{(i-1)}$, and thus at most $\poly\log(n/\eps)$ variables remain that affect the functions $f_{j}^{(i)}$.
+%	Since $|\VBad_i| \le 10\log(n/\eps)$, and there are at most $16^{2C\log \log(n/\eps)} \le \poly\log(n/\eps)$ ``good'' functions that depend on at most $C\log\log(n/\eps)$ variables. 
+%	 Overall, only $\poly\log(n/\eps)$ variables remain that affect the functions $f_{j}^{(i)}$, and 
+Thus, we can write $\prod_{j=1}^{m} f_j^{(i)}$ as a ROBP of width $2w$ and length $\poly\log(n/\eps)$, which is $(\eps/2)$-fooled by the pseudorandom generator from Theorem~\ref{thm:CHRT} using  $\tildeO(\log(n/\eps))$ random bits.
+	 
+\item We stopped at Step~4 at some iteration $i$.
+%We wish to bound $|\Good_{i}|$ from above. 
+%Let $G = \Good_{i} \cap \Good_{(i-1)}$.
+%Since $\Good_{(i-1)} \le 16^{2b_i}$ we have $|G| \le 16^{2b_i}$.
+%All functions in $G$ are non-constant and have at most $b_i$ affecting variables.
+%Other than $G$ there are at most $|\VBad_{(i-1)}| + |\VBad_{i}| \le 20\log(n/\eps)$ alive variables.
+Certainly, $|\Good_{i}|\le  |\Good_{(i-1)}|+|\Bad_{(i-1)}| \le 16^{2b_i} + 10 \log(n/\eps) \le 2\cdot 16^{2b_i}$.
+%Note that there are at most $16^{2 b_i}$ good functions in the beginning of the $i$-th iteration, 
+%otherwise we would have stopped earlier.
+Thus, we are in the case that was handled in Section~\ref{sec:4.1}, with $t \le 10 \log(n/\eps)$. Indeed, Lemma~\ref{lemma:Gb} guarantees that $\GMany(b_i,10\log(n/\eps), n, \eps/2)$ fools the remaining function with error at most $\eps/2$ using $O(\log(n/\eps))$ random bits.
+\end{enumerate}
+
+
+\subsection{The Actual Generator}\label{sec:4.3}
+Algorithm~\ref{alg:adaptive} described the pseudo-random generator as if we knew whether or not the condition in step 3 holds. 
+However, a pseudorandom generator cannot depend on the function it tries to fool.
+To overcome this issue, we use the following general observation regarding pseudorandom generators.
+
+\begin{claim}\label{claim:XOR-of-PRGs}
+Say there are two families of functions $\mathcal{F}_1$ and $\mathcal{F}_2$ that are both closed under shifts (i.e., closed under XORing a constant string to the input). Say that $\D_1$ is an $\eps$-PRG for $\mathcal{F}_1$ and $\D_2$ is an $\eps$-PRG for $\mathcal{F}_2$  then $\D_1 \oplus \D_2$ is an $\eps$-PRG for $\mathcal{F}_1 \cup \mathcal{F}_2$.\end{claim}
+\begin{proof}
+%
+Let $f \in \mathcal{F}_1 \cup \mathcal{F}_2$, we show that $\D_1 \oplus \D_2$ fools $f$.
+By symmetry assume $f\in \mathcal{F}_1$.
+\begin{align*}
+\abs{\E_{\substack{x_1\sim \D_1\\ x_2 \sim \D_2}}[f(x_1 \oplus x_2)] -\E_{\substack{z\sim U}}[f(z)]}
+&=\abs{\E_{\substack{x_1\sim \D_1\\ x_2 \sim \D_2}}[f(x_1 \oplus x_2)] -\E_{\substack{x_1\sim U\\ x_2 \sim \D_2}}[f(x_1 \oplus x_2)]}\\ 
+&\le  \E_{x_2 \sim \D_2} 
+\abs{\E_{x_1 \sim \D_1}[f(x_1 \oplus x_2)] -\E_{x_1\sim U}[f(x_1 \oplus x_2)]}\\
+&=  \E_{x_2 \sim \D_2} \abs{\E_{x_1 \sim \D_1}[f_{x_2}(x_1)] -\E_{x_1\sim U}[f_{x_2}(x_1)]}\end{align*}
+where $f_{y}(x):= f(x\oplus y)$. Since $\mathcal{F}_1$ is closed under shifts, we have that $f_{x_2} \in \mathcal{F}_1$ thus $\D_1$ $\eps$-fools $f_{x_2}$ and we get
+$
+\E_{x_2 \sim \D_2} \abs{\E_{x_1 \sim \D_1}[f_{x_2}(x_1)] -\E_{x_1\sim U}[f_{x_2}(x_1)]} \le \eps\;.$
+\end{proof}
+
+The actual generator would proceed as follows.
+\begin{algorithm}[H]
+\caption{The Pseudorandom Generator $\GXOR(T, w, b,\eps)$} % (A,m)}
+\begin{algorithmic}[1]
+\Require a set $T\subseteq [n]$ of the ``live'' coordinates, a width $w$,  an integer $b$, a parameter $\eps\in (0,1)$.
+\If{$b \le C\log\log(n/\eps)$} \Return $\mathbf{CHRT}(n, n', 2w,  \eps)|_{T}$ for $n' = 2\cdot 16^{2b}\cdot b +10\log(n/\eps)$
+\EndIf
+\State Let $x := \GMany(b,t,n,\eps)|_{T}$ for $t = 10 \log(n/\eps)$.
+\State Pick $T' \subseteq T$, $y\in \pmone^{T\setminus T'}$ according to Claim~\ref{claim:assigning-0.9999}
+\State Let $z  := \GXOR(T', w, b/2,\eps/2)$.
+\State \Return  $x \oplus \Sel_{T'}(z,y)$.
+\end{algorithmic}
+\end{algorithm}
+
+
+\begin{claim}[Proof of Correctness]\label{claim:correctness}
+Let $T \subseteq [n]$.
+Suppose $f_1, \ldots, f_m$ are functions on disjoint sets of $T$.
+Suppose each function depends on at most $b$ variables except for a total of at most $10 \log(n/\eps)$ variables, and the number of non-constant functions is at most $2 \cdot 16^{2b}$.
+Then, $\GXOR(T,w, b,\eps)$ fools $f = \prod_{i=1}^{m} f_i$ with error $\eps$.
+\end{claim}
+\begin{proof}
+We prove the claim by induction on $b$.
+	If $b \le C \log \log(n/\eps)$ then Theorem~\ref{thm:CHRT} implies correctness.
+	If $b > C \log \log(n/\eps)$ then we
+	consider the following two cases:
+	\begin{enumerate}
+%	{\color{red}
+		\item If there are more than $16^b$ good functions, then $x = \GMany(b,t,n,\eps)|_{T}$ fools $\prod_{i=1}^{m}f_i$ with error $\eps$.
+%	}
+		\item Otherwise, there are at most $16^b$ good functions and we apply Step~3. According to Claim~\ref{claim:assigning-0.9999}, the average acceptance probability of $f_{T'|y}$ is $\eps/4$ close to that of $f$. 
+	Furthermore, with  probability at least $1-\eps/4$ all functions $(f_1)_{T'|y}, \ldots, (f_m)_{T'|y}$ depend on at most $b/2$ variables except for at most $10 \log(n/\eps)$ variables (by Claim~\ref{claim:VBad}).
+	In such a case, the number of non-constant functions among $(f_1)_{T'|y}, \ldots, (f_m)_{T'|y}$ is at most $16^{b} + 10\log(n/\eps) \le 2\cdot 16^{b}$.
+	Using induction, $z = \GXOR(T',w,b/2,\eps/2)$ fools $f_{T'|y}$ with error $\eps/2$, and we get that $\Sel_{T'}(z,y)$ fools $f$ with error $\eps$.
+
+	\end{enumerate}
+	Since we have a pseudorandom generator fooling the function in each case,
+	 Claim~\ref{claim:XOR-of-PRGs} shows that $x \oplus \Sel_{T'}(z,y)$ fools $f$ with error $\eps$.
+	\end{proof}
+	
+	
+
+
+\begin{claim}[Seed Length]\label{claim:seed-length}
+	The amount of random bits used to calculate $\GXOR([n],w, b,\eps)$ is at most $O(\log(b) + \log\log(n/\eps))^{2w+2} \cdot \log(n/\eps)$.
+\end{claim}
+\begin{proof}
+Unwrapping the recursive calls in the evaluation of $\GXOR([n],w, b,\eps)$ we see that there are at most $\log(b)$ recursive calls to the procedure and that the error parameters are at least $\eps/2^{\log(b)} \ge \eps/n$ in all of them.
+
+We apply the generator from Theorem~\ref{thm:CHRT} only once during these recursive calls, on a ROBP of width-$w$ and length $\poly\log(n/\eps)$. Thus, the application of Theorem~\ref{thm:CHRT} uses at most  $O(\log\log(n/\eps)^{w+2} \log(n/\eps))$ random bits.
+
+The partial assignment from Claim~\ref{claim:assigning-0.9999} uses  at most $O\big(\log(b) + \log\log(n/\eps)\big)^{2w+1} \cdot \log(n/\eps)$ each time we invoke it, and we invoke it at most $\log(b)$ times.
+
+The generator $\GMany$ uses $O(\log (n/\eps))$ random bits each time we invoke it, and we invoke it at most $\log(b)$ times.
+\end{proof}
+
+Claims~\ref{claim:correctness} and~\ref{claim:seed-length} completes the proof Theorem~\ref{thm:GXOR} with $\GXOR([n], w, b, \eps)$ as the generator.
+
+
+
+\subsection{Pseudorandom generator for read-once polynomials}
+
+\begin{thm}\label{thm:read-once poly}
+There exists an explicit $\eps$-PRG for the class of read-once polynomials on $n$ variables with seed-length $O((\log \log(n/\eps))^6 \cdot \log(n/\eps))$.
+%$\GXOR([n],2, \log(4n/\eps),\eps/4n)$ fools any read-once polynomial with error at most $\eps$. Its seed length is $O((\log \log(n/\eps))^6 \cdot \log(n/\eps))$.
+\end{thm}
+\begin{proof}
+We show that $\GXOR([n],2, \log(8n/\eps),\eps/8n)$ fools any read-once polynomial with error at most $\eps$. Its seed length is $O((\log \log(n/\eps))^6 \cdot \log(n/\eps))$.
+
+	A read-once polynomial can be written as the XOR of AND functions on disjoint variables, i.e., as the XOR of width-$2$ ROBPs on disjoint variables.
+	It remains to show that these ROBPs are short.
+	Rather, we show that any PRG that $(\eps/8n)$-fools read-once polynomials of degree at most $b = \log(8n/\eps)$ also $\eps$-fools all read-once polynomials.
+Let	$$f(x) = \sum_{i=1}^{m} \prod_{j\in B_i} x_j$$ be a read-once polynomial over $\F_2$, where $B_1, \ldots, B_m$ are disjoint subsets of $[n]$.
+Without loss of generality let $B_1, \ldots, B_\ell$ be the blocks of length bigger than $b$. 
+Let $$f'(x) = \sum_{i=\ell+1}^{m} \prod_{j\in B_i} x_j,$$ be the sum over monomials of degree at most $b$ of $f$.
+Let $\D = \GXOR([n],2, \log(8n/\eps),\eps/8n)$. By triangle inequality
+\begin{align}\nonumber\abs{\E_{x\sim \D}[f(x)] -\E_{x\sim U_n}[f(x)]} &\le \Pr_{x\sim \D}[f(x) \neq f'(x)] + \Pr_{x\sim U_n} [f(x) \neq f'(x)] + 
+\abs{\E_{x\sim \D}[f'(x)] -
+\E_{x\sim U_n}[f'(x)]}\\
+&\le \sum_{i=1}^{\ell} \Pr_{x\sim \D}[\wedge_{j\in B_i}(x_j=1)] + \sum_{i=1}^{\ell} \Pr_{x\sim U_n}[\wedge_{j\in B_i}(x_j=1)] + \eps/8n\label{eq:read-once polys}
+\end{align}
+For $i\in \{1,\ldots, \ell\}$, since $|B_i|\ge b$, we have
+$\Pr_{x\sim U_n}[\wedge_{j\in B_i}(x_j=1)] \le 2^{-b} \le \eps/8n$. 
+As for the distribution $\D$, by monotonicity 
+$$\Pr_{x\sim \D}[\wedge_{j\in B_i}(x_j=1)] \le
+\Pr_{x\sim \D}[\wedge_{j\in B'_i}(x_j=1)]$$ where $B'_i$ is any arbitrary subset of exactly $b$ variables from $B_i$. Since $\D$ fools degree-$b$ read-once polynomials with error at most $\eps/8n$, and $\wedge_{j\in B'_i}(x_j=1)$ is such a polynomial, we get that $\Pr_{x\sim \D}[\wedge_{j\in B'_i}(x_j=1)]$  is at most $2^{-b} + \eps/8n \le \eps/4n$.
+Plugging both bounds into Eq.~\eqref{eq:read-once polys} we get $\abs{\E_{x\sim \D}[f(x)] -\E_{x\sim U_n}[f(x)]}\le (\eps/4n)\cdot \ell + (\eps/8n)\cdot \ell + \eps/8n \le \eps$.
+\end{proof}
+
+

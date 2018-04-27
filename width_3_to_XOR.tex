@@ -1,0 +1,174 @@
+
+\section{From width-3 ROBPs to the XOR of short ROBPs}
+In Section 3, we prove the following main theorem.
+\begin{thm}\label{thm:main}
+Let $n,w,b\in \N$, $\eps>0$. There exists an explicit pseudorandom restriction assigning $p = 1/O(\log(b \cdot \log(n/\eps)))^{2w}$ fraction of  $n$ variables using $O(w \cdot \log (n/\eps) \cdot (\log\log(n/\eps) + \log(b)))$ random bits, that maintains the acceptance probability of any XOR of ROBPs of width-$w$ and length-$b$ up to error $\eps$.
+\end{thm}
+The pseudorandom restriction assigns $p$ fraction of the variables as follows: 
+\begin{enumerate}
+	\item Choose a set of coordinates $T \subseteq [n]$ according to a $\delta_T$-biased distribution with marginals $p$, for $\delta_T := p^{ O(\log(n/\eps))}$.
+	\item Assign the variables in $T$ according to a $\delta_x$-biased distribution, for $\delta_x := (\eps/n)^{O(\log b)}$.
+\end{enumerate}
+Known constructions of small-biased distributions \cite{NaorNaor93,AlonGHP92,Ta-Shma17} show that it suffices to use $O(\log(n/\delta_T) + \log(n/\delta_x)) \le O(w \cdot \log (n/\eps) \cdot (\log\log(n/\eps) + \log(b)))$ random bits to sample the restriction.
+
+In this section, we show how to design pseudorandom restrictions for unordered width-3 ROBPs from pseudorandom restrictions to the XOR of many width-3 ROBPs of length $O(\log (n/\eps))$.
+%
+%In this section, we reduce the case of width-3 ROBPs to the case of XOR of width-3 ROBPs of length $O(\log (n/\eps))$ using a pseudorandom restriction leaving each variable alive with probability $1/2$. 
+We get the following theorem.
+
+\begin{thm}
+\label{thm:main_two_steps}
+Let $n\in \N, \eps>0$. There exists an explicit pseudorandom restriction assigning $p = 1/O(\log \log(n/\eps))^{6}$ fraction of the variables using $O(\log (n/\eps) \log\log(n/\eps))$ random bits, that maintains the acceptance probability of any unordered width-$3$ length-$n$ ROBP up to error $\eps$.
+\end{thm}
+
+
+\paragraph{Proof Sketch.}
+In this section, we shall show that under pseudorandom restrictions leaving each variable alive with probability $1/2$, with high probability, the bias function of a ROBP $B$ can be written as a linear combination (up to a small error) over functions of the form $f_1 \cdot f_2 \cdot \ldots \cdot f_m$ where each $f_i$ is a  short subprogram of the original program of length $O(\log (n/\eps))$, and each $f_i$ is defined on a disjoint set of coordinates. Each function $g$ in the linear combination will have a weight $\alpha_g \in [-1,1]$, and the sum of absolute values of weights over all functions participating in the linear combination will be at most $n$. This will show that any generator that $\eps/n$-fools the XOR of short width-$3$ ROBPs also $\eps$-fools width-$3$ length-$n$ ROBPs under random restrictions.
+
+The reduction will first establish that with high probability (over the choice of the set of coordinates that are left alive) the bias function of a ROBP $B$ can be written as the average of width-$3$ length-$n$ ROBPs, whose vast majority have at most $O(\log (n/\eps))$ layers between every two layers with width-$2$. 
+Then, we use a result of Bogdanov et al.~\cite{BogdanovDVY13} that  reduces branching programs with many width-$2$ layers to the XOR of short ROBPs.
+
+We focus on the first part of the reduction. 
+First, consider the case when $B$ is locally-monotone. 
+In this case, every layer of edges is either the identity layer or a colliding layer \cite{BrodyV10}. Assume without loss of generality that there are no identity layers.
+Then, under a pseudorandom restriction, with high probability, in every $O(\log (n/\eps))$ consecutive layers we will have a layer of edges whose corresponding variable is fixed to the value on which the edges in the layer collide, leaving at most $2$ vertices reachable in the next layer of vertices. Removing unreachable vertices, we get that with high probability under the random restriction, in every $O(\log (n/\eps))$ consecutive layers there is a layer of vertices with width-$2$.
+
+However, in the case that $B$ is not locally-monotone (e.g.,  when $B$ is a permutation ROBP) it could the case that the widths of all layers of vertices remain $3$ under the random restriction.
+Our main observation is that since the bias function takes the average over all assignments to the restricted variables, the bias function of $B$ does not depend on the labels of edges marked by the restricted variables. 
+More formally, for any $T \subseteq [n]$, if $B$ and $C$ are two ROBPs with the same graph structure that only differ on the labels on the edges in layers $[n]\setminus T$, then $\Bias_T(B) = \Bias_T(C)$.
+Thus, once $T$ is fixed we may relabel the layers in $[n]\setminus T$ so that they are locally-monotone, yielding a new ROBP $B'$, and then apply the bias function.
+Using the analysis of the locally monotone case, we get that the bias function of $B'$ (and thus the bias function of $B$) is the average of $B'$ over all restrictions fixing the coordinates in $[n]\setminus T$, and we know that most of these restricted ROBPs have width-$2$ in every $O(\log (n/\eps))$ consecutive layers.
+
+Essentially, the bias function allows us to imagine as if we are taking the average over restrictions of $B'$ rather than restrictions of $B$, and restrictions of $B'$ are ``simpler'' to fool than restrictions of $B$ since they have many layers with width-$2$.
+
+
+The formal argument follows.
+
+\begin{theorem}[From width-$3$ to almost width-$2$]\label{thm:the-bias-trick}
+%Let $C>0$ be a large enough constant.
+Let $B$ be a ROBP of width-$3$ and length-$n$. 
+Let $\eps>0$. 
+Let $\D_{1/2}$ be a $(\eps/n)^{10}$-biased distribution over subsets of $[n]$ with marginals $1/2$.
+Let $T\sim \D_{1/2}$ be a random variable.
+Let $B^T$ be the branching program $B$ where the layers in $[n] \setminus T$ are relabeled so that they are locally monotone.
+Then, 
+$$
+\Bias_T(B)(x) = \Bias_T(B^T)(x) = \E_{y\sim U_{[n]\setminus T}}[(B^{T}_{T|y}(x)]
+$$
+and with  probability at least $1-\eps$ over the choice of $T$ and $y$, $B^{T}_{T|y}$ can be computed by a ROBP of the form $D_1 \circ \ldots \circ D_m$ where $\{D_i\}_{i=1}^{m}$ are defined over disjoint sets of at most $b = (3\log(n/\eps))$ variables, and each $D_i$ is a width-$3$ ROBP with at most $2$ vertices on the first and last layers.
+\end{theorem}
+
+\begin{proof}
+We first observe that $\Bias_T(B)(x) = \Bias_T(B^T)(x)$.
+Indeed, for any fixed $x$, $\Bias_T(B)(x)$ equals the probability that the following random-path in $B$ accepts:
+\begin{quote}
+Initiate $v_1$ to be the start node of $B$. For $i=1, \ldots, n$ if $i \in T$, take the edge exiting $v_i$ marked by $x_i$, otherwise (i.e., if $i\in [n]\setminus T$) pick a random edge out of the two edges exiting $v_{i}$. Denote by $v_{i+1}$ the node at the end of the edge taken in the $i$-th step. Accept if and only if $v_{n+1}$ is an accepting node.\end{quote}
+ Observe that the following random process is oblivious to the labels of edges in layers $[n]\setminus T$, thus it would yield the same probability for $\Bias_T(B)$ and for $\Bias_T(B^{T})$. Overall, we got that $\Bias_T(B)$ and $\Bias_T(B^T)$ are equal as functions.
+
+In the remainder of the proof, we analyze $\Bias_T(B^T)$.
+Let $E_{i,1}$ and $E_{i,-1}$ denote the set of edges in the $i$-layer of $B$ marked by $1$ and $-1$ respectively.
+We assume without loss of generality that in all layers of edges  $E_{i,1} \neq E_{i,-1}$, as otherwise the $i$-th layer is redundant and may be eliminated.
+(Observe that under any relabeling of $B$ this property is preserved.)
+By the collision lemma of Brody-Verbin~\cite{BrodyV10}, for any $i\in [n] \setminus T$, layer $i$ in $B^T$ has the following property: either $E_{i,1}$ or $E_{i,-1}$ has at most $2$ end-vertices.
+
+Next, we consider the program $B^{T}_{T|y}$ for a pseudorandom $T$ and a random $y\in \pmone^{[n]\setminus T}$.
+For $i=1, \ldots, n$ we say that the $i$-th layer of edges is ``good'' under the choice of $T$ and $y$, if $i \in [n] \setminus T$ and layer $E_{i,y_i}$ of $B^T$ has at most $2$ end-vertices.
+Let $b = 3 \log(n/\eps)$.
+For $i=1, \ldots, n-b+1$ let $\cE_i$ be the event that none of layers $\{i,i+1, \ldots, i+(b-1)\}$ is good.
+Since $T$ is sampled from a $(\eps/n)^{10}$-biased distribution with marginals $1/2$, we have that $T$ is $(\eps/2n)$-almost $b$-wise independent.
+Thus, up to an error of $\eps/2n$ we may analyze the event $\cE_i$ under uniform choice of a subset $T\subseteq[n]$.
+Indeed, under a uniform choice for $T$ and $y$ each layer is good with probability at least $1/4$, and all $b$ layers are not good with probability at most $(3/4)^{b}$.
+Overall, we get $\Pr[\cE_i] \le (3/4)^{b} + (\eps/2n) \le \eps/n$.
+By the union bound, $$\Pr[\cE_1 \vee \cE_2 \vee \ldots \vee \cE_{n-b+1}] \le (n-b+1) \cdot (\eps/n) \le \eps.$$
+Under the event that all $\cE_i$ are false, we get that $B^T_{T|y}$ has width $2$ in every $b$ layers. %(in fact, we may further eliminate all layers in $[n]\setminus T$ from the program, which can only make things better).
+In such a case, we may write the restricted function $B^T_{T|y}$ as $D_1 \circ \ldots \circ D_m$ where each $D_i$ is a width-$3$ and length at most $b$ ROBP with at most $2$ vertices on the first and last layer.
+\end{proof}
+
+\begin{theorem}[from almost width-2 to the XOR of short ROBPs  - restatement of \protect{\cite[Thm.~2.1]{BogdanovDVY13}}]
+	\label{thm:BDVY}
+	%Let $b\in \N$.
+	Let $B$ be a ROBP of the form $D_1\circ \ldots \circ D_m$  where $\{D_i\}_{i=1}^{m}$ are defined over disjoint sets of %at most $b$ 
+	variables, and each $D_i$ is a width-$3$ ROBP with at most $2$ vertices on the first and last layers.
+	Then, (as a real-valued function) $B$ can be written as a linear combination of 
+	$\sum_{\alpha \in \B^m} c_{\alpha} \cdot \prod_{i=1}^{n} D_{i,\alpha_i}$
+	where $D_{i,0}, D_{i,1}$ are subprograms of $D_{i}$ and $\sum_{\alpha\in \B^n}{|c_\alpha|} \le m$.
+	\end{theorem}
+
+
+\begin{proof}[Proof of Theorem~\ref{thm:main_two_steps}]
+We prove that the following pseudorandom restriction maintains the acceptance probability of ROBPs of width-$3$ and length-$n$ up to error $\eps$.
+Let $\eps_1 := \eps/2$, $\eps_2 := \eps/2n$.
+\begin{enumerate}
+	\item Pick $T_0 \subseteq [n]$ using a $(\eps_1/n)^{10}$-biased distribution with marginals $1/2$.
+	\item
+	\begin{enumerate}
+	\item Pick $T\subseteq T_0$ using a $\delta_T$-biased distribution with marginals $p = 1/O(\log \log ( n/\eps_2))^{6}$.
+	\item Assign the coordinates in $T$ using a $(\eps_2/n)^{O(\log \log (n/\eps_2))}$-biased distribution $\D_x$.
+	\end{enumerate}
+\end{enumerate}
+%
+Equivalently, we prove that the following distribution $\eps$-fools ROBPs of width-$3$ and length-$n$.
+\begin{enumerate}
+	\item Pick $T_0 \subseteq [n]$ using a $(\eps_1/n)^{10}$-biased distribution with marginals $1/2$.
+	\item Assign the coordinates in $[n]\setminus T_0$ uniformly at random.
+	\item
+	\begin{enumerate}
+	\item Pick $T\subseteq T_0$ using a $\delta_T$-biased distribution with marginals $p = 1/O(\log \log ( n/\eps_2))^{6}$.
+	\item  Assign the coordinates in $T_0\setminus T$ uniformly at random.
+	\item Assign the coordinates in $T$ using a $(\eps_2/n)^{O(\log \log (n/\eps_2))}$-biased distribution $\Dx$.
+	\end{enumerate}
+\end{enumerate}
+
+Let $y\sim U_{[n]\setminus T_0}$. Let ${\cal G}$ be the event that $B^{T_0}_{T_0|y}$  can be computed by a ROBP of the form $D_1\circ \ldots \circ D_m$  where $\{D_i\}_{i=1}^{m}$ are defined over disjoint sets of at most $b=3\log(n/\eps_1)$ variables, and each $D_i$ is a width-$3$ ROBP with at most $2$ vertices on the first and last layers.
+By Theorem~\ref{thm:the-bias-trick} $\Pr({\cal G}) \ge 1-\eps_1$. 
+Assuming that ${\cal G}$ happened, then by Theorem~\ref{thm:BDVY},
+$B^{T_0}_{T_0|y}$ can be written as 
+$\sum_{\alpha \in \B^m} c_{\alpha} \cdot \prod_{i=1}^{n}D_{i,\alpha_i}$
+	where $D_{i,\alpha_i}$ are subprograms of $D_{i}$ and $\sum_{\alpha\in \B^n}{|c_\alpha|} \le m$.
+For each $\alpha\in \B^m$, using Theorem~\ref{thm:main} we have that 
+$$
+\left| 
+\E_{z\sim U_{T_0}}\left[\prod_{i=1}^{m}D_{i,\alpha_i}(z)\right]
+- \E_{T}\E_{x\sim \Dx}\E_{y' \sim U_{T_0 \setminus T}} \left[\prod_{i=1}^{m}D_{i,\alpha_i}(\Sel_{T}(x, y'))\right]
+ \right| 
+ \le \eps_2\;.
+$$
+By linearity of expectation and the triangle inequality
+$$
+\bigg|\E_{z\sim U_{T_0}}\bigg[\sum_{\alpha} c_{\alpha} \cdot \prod_{i=1}^{m}D_{i,\alpha_i}(z)\bigg] - \E_{T}\E_{x\sim \Dx}\E_{y' \sim U_{T_0 \setminus T}}
+ \bigg[\sum_{\alpha} c_{\alpha} \cdot \prod_{i=1}^{m} D_{i,\alpha_i}(\Sel_{T}(x, y'))\bigg]\bigg|$$
+$$\le \sum_{\alpha}{|c_{\alpha}|} \cdot  \eps_2 \;\le\; m \cdot \eps_2 \;\le\; \eps/2
+$$
+%
+Overall, we get
+%
+$$\bigg|\E_{z\sim U_n}[B(z)]-
+\E_{\substack{T_0,\\y\in U_{\bar{T_0}}}}\;
+\E_{\substack{T, x\sim \Dx\\y' \sim U_{T_0 \setminus T}}}\;
+[B(\Sel_{T_0}(\Sel_T(x,y'),y)]\bigg| =
+$$
+$$ 
+\bigg|\E_{z\sim U_n}[B(z)]-
+\E_{\substack{T_0,\\y\in U_{[n]\setminus T_0}}}\;
+\E_{\substack{T, x\sim \Dx\\y' \sim U_{T_0 \setminus T}}}\;\
+[B^{T_0}(\Sel_{T_0}(\Sel_T(x,y'),y)]\bigg| = 
+$$
+\begin{equation}\label{eq:aa}
+	\bigg|\E_{\substack{T_0,\\y\in U_{[n]\setminus T_0}}}\;
+\E_{\substack{T, z\sim U_{T} \\y' \sim U_{T_0 \setminus T}}}\;\
+[B^{T_0}(\Sel_{T_0}(\Sel_T(z,y'),y)]-
+\E_{\substack{T_0,\\y\in U_{[n]\setminus T_0}}}\;
+\E_{\substack{T, x\sim \Dx\\y' \sim U_{T_0 \setminus T}}}\;\
+[B^{T_0}(\Sel_{T_0}(\Sel_T(x,y'),y)]\bigg|
+\end{equation}
+where the last equality is due to the fact for any $T,T_0$ the distribution of $\Sel_{T_0}(\Sel_T(z,y'),y)$ is the uniform distribution over $\pmone^{n}$.
+We bound Expression~\eqref{eq:aa} by 
+%
+\begin{align*}
+	&\E_{T_0,y\in U_{[n]\setminus T_0}}\left[\left|\E_{T} \E_{y' \sim U_{T_0 \setminus T}} \left(\E_{z\sim U_{T}} [B^{T_0}_{T_0|y}(\Sel_T(z,y'))]- \E_{x\sim \Dx} [B^{T_0}_{T_0|y}(\Sel_T(x,y'))]\right)\right|\right]
+	\\&\le \Pr\left[\neg {\cal G}\right]  + \E_{T_0,y\in U_{[n]\setminus T_0}}\left[\Big|\E_{T,y' \sim U_{T_0 \setminus T}} \Big(\E_{z\sim U_{T}} [B^{T_0}_{T_0|y}(\Sel_T(z,y'))]- \E_{x\sim \Dx} [B^{T_0}_{T_0|y}(\Sel_T(x,y'))]\Big)\Big| \; \bigg| \; {\cal G} \right]
+	\\& \le \eps/2 + \eps/2
+\end{align*}
+%
+where the second summand is bounded by $\eps/2$ according to the above discussion using Theorem~\ref{thm:BDVY} and Theorem~\ref{thm:main}.
+	\end{proof}

@@ -1,0 +1,275 @@
+\newcommand{\Sel}{\mathrm{Sel}}
+\section{Preliminaries}
+
+Denote by $U_n$ the uniform distribution over $\pmone^n$, and by $U_S$ for $S\subseteq [n]$ the uniform distribution over $\pmone^S$. 
+Denote by $\log$ the logarithm in base $2$. For any function $f: \pmone^n \to \R$, we shorthand by $\E[f] = \E_{x\sim U_n}[f(x)]$ and by  $\Var[f] = \E[f^2]-\E[f]^2$.
+For an event $E$ we denote by $\one_{E}$ its indicator function.
+\subsection{Restrictions}
+For a set $T \subseteq [n]$ and two strings $x \in \pmone^T$, $y\in \pmone^{[n]\setminus T}$ we denote 
+by $\Sel_T(x,y)$ the string with $$\Sel_T(x,y)_i = \begin{cases}x_i,& i\in T\\ y_i, &\text{otherwise.}\end{cases}$$
+\begin{definition}[Restriction]\label{def:restriction}
+  Let $f:\pmone^n\to\R$ be a  function. A {\sf restriction} is a pair $(T,y)$ where $T \subseteq [n]$ and $y \in \pmone^{[n]\setminus T}$. We denote by $f_{T|y}:\pmone^n \to \R$ the function $f$ restricted according to $(T,y)$, defined by $f_{T|y}(x) = f(\Sel_T(x,y))$.
+%  \[
+% f_{T|y}(x) = f(z), \;\;\;\;\text{where}\;\;\;\;\;z_i = \begin{cases}x_i,& i\in T\\ y_i, &\text{otherwise}\end{cases}.
+%  \]
+\end{definition}
+
+
+\begin{definition}[Random Valued Restriction]\label{def:random_valued_restriction}
+Let $n \in \N$.
+A random variable $(T,y)$, distributed over restrictions of $\pmone^n$ is called {\sf random-valued} if conditioned on $T$, the variable $y$ is uniformly distributed over $\pmone^{[n]\setminus T}$.
+\end{definition}
+
+
+\begin{definition}[$p$-Random Restriction]\label{def:p_random_restriction}
+  A {\sf $p$-random restriction} is a random-valued restriction over pairs $(T,y)$ sampled in the following way: For every $i\in[n]$, independently, pick $i$ to $T$ with
+  probability $p$;  
+  Sample $y$ uniformly from $\pmone^{[n]\setminus T}$.
+  We denote this distribution of restrictions by $\Rp$.
+\end{definition}
+
+\begin{definition}[The Bias-Function]\label{def:bias_function}
+Let $f: \pmone^n \to \R$.
+Let $T \subseteq [n]$. 
+We denote by $\Bias_T(f): \pmone^n \to  \R$ the function defined by $(\Bias_T(f))(x) = \E_{y\sim U_{[n]\setminus T}}[f_{T|y}(x)]$.
+When $T$ is clear from the context, we shorthand $\Bias_T(f)$ as $\tilde{f}$.
+\end{definition}
+
+\subsection{Fourier Analysis of Boolean Functions}\label{subsec:Fourier}
+Any function $f: \pmone^n \to \R$ has a unique Fourier representation:
+\[ f(x) = \sum_{S\subseteq[n]} \hat{f}(S) \cdot \prod_{i\in S} x_i\;,\]
+where the coefficients $\hat{f}(S) \in \R$ are given by $\hat{f}(S) = \E_{x\sim U_n} [f(x) \cdot \prod_{i\in S} x_i]$.
+We have $\var[f] = \sum_{\emptyset \neq S \subseteq [n]}{\hat{f}(S)^2}$.
+We denote the {\sf spectral-norm} of $f$ by $L_1(f) \triangleq \sum_{S \subseteq [n]} |\hat{f}(S)|$.
+For any functions $f,g: \pmone^n \to \R$ it holds that $L_1(f\cdot g) \le L_1(f) \cdot L_1(g)$ where equality holds if $f$ and $g$ depends on disjoint sets of variables. Additionally, $L_1(f+g) \le L_1(f) + L_1(g)$.
+The following fact relates the Fourier coefficients of a Boolean function and its bias-function.
+
+
+\begin{fact}[\protect{\cite[Proposition~4.17]{OdonnellBook}}]\label{fact:bias-fnc-Fourier}
+	Let $f: \pmone^n \to \R$ and $S, T \subseteq [n]$. Then,
+$\widehat{(\Bias_T f)}(S) = \hat{f}(S) \cdot \one_{\{S \subseteq T\}}$
+\end{fact}
+
+\subsection{Small-Biased Distributions}
+We say that a distribution $\D$ over $\pmone^n$ is {\sf $\delta$-biased}  if for any non-empty $S \subseteq [n]$ it holds that
+$\abs{\E_{x\sim \D}[\prod_{i\in S} x_i]} \le \delta$. \cite{NaorNaor93,AlonGHP92,Ta-Shma17} show that $\delta$-biased distributions can be sampled using $O(\log(n/\delta))$ random bits. 
+
+Let $p \in (0,1]$. We say that a distribution $\D_p$ over subsets of $[n]$ is {\sf $\delta$-biased with marginals~$p$} if for any non-empty $S \subseteq [n]$ it holds that
+$\Pr_{T\sim \D_p} [S \subseteq T] = p^{|S|} \pm \delta.
+$
+
+\begin{claim}\label{claim:sampling-t}
+Let $p = 2^{-a}$ for some integer $a>0$, 
+let $\D$ be an $\eps$-biased distribution over $\pmone^{na}$.
+Define $\D_p$ to be a distribution over subsets of $[n]$ as follows:
+Sample $x\sim \D$. 
+Output 
+$T = 
+\{i\in [n]: \bigwedge_{j\in [a]} (x_{(i-1)a + j} = 1)\}$.
+Then $\D_p$ is $\eps$-biased with marginals $p$.
+\end{claim}
+\begin{proof}
+For any fixed $S$, 
+	the probability that $S \subseteq T$ is exactly the probability that $\bigwedge_{i\in S, j\in [a]} (x_{(i-1)a + j} = 1)$.
+	In an $\eps$-biased distribution, the latter event happens with probability $2^{-a\cdot |S|} \pm \eps$ (See \cite{AlonGHP92}).
+\end{proof}
+
+
+
+\begin{claim}\label{claim:inclusion-exclusion}
+If $\D_p$ is $\delta$-biased with marginals $p$, then for any disjoint $S,S'\subseteq [n]$ it holds that 
+$\Pr_{T\sim \D_p}[S \cap T = \emptyset, S' \subseteq T] = (1-p)^{|S|}\cdot p^{|S'|} \pm \delta	\cdot 2^{|S|}$.
+\end{claim}
+\begin{proof}
+	By inclusion-exclusion 
+	\begin{align*}\Pr_{T \sim \D_p}[S \cap T = \emptyset, S' \subseteq T] &= \sum_{R \subseteq S} (-1)^{|R|} \cdot \Pr_{T \sim \D_p}[R \cup S' \subseteq T] \\
+	&= \sum_{R \subseteq S} (-1)^{|R|} \cdot (\Pr_{T \sim U}[R \cup S' \subseteq T] \pm \delta)\\
+	&= \Pr_{T \sim U}[S \cap T = \emptyset, S' \subseteq T] \pm 2^{|S|}\cdot \delta.\qedhere\end{align*}
+\end{proof}
+
+
+\subsection{Standard tail bounds for $k$-wise independence}
+
+\begin{lemma}[\protect{\cite[Thm.~4, restated]{SchmidtSS95}}]
+\label{lemma:tail_bounds}
+Let $\ell$ be an even positive integer.
+	Let $X_1, \ldots, X_m$ be some $\ell$-wise independent random variables bounded in $[-1,1]$ with expectation $0$.
+	Let $V = \sum_{i=1}^{m}\var[X_i]$.
+	Then,
+	$\E[(X_1 + \ldots +X_m)^{\ell}] \le \max\{\ell^\ell, (\ell V)^{\ell/2}\}.$
+	%\le \ell^\ell + (\ell V)^{\ell/2}.$$ 
+\end{lemma}
+
+
+%\begin{corollary}
+%	Let $\ell$ be an even positive integer.
+%Let $Y_1, \ldots, Y_m$ be random variables.
+%Let $X_1, \ldots, X_m$ be some $\ell$-wise independent random variables bounded in $[-1,1]$ with expectation $0$.
+%Let $V = \sum_{i=1}^{m}\var[X_i]$.
+%Suppose for all $i_1, \ldots, i_\ell \in [m]$ not necessarily distinct we have $|\E[X_{i_1} \cdots X_{i_\ell}] - \E[Y_{i_1} \cdots Y_{i_\ell}]| \le \eps$.
+%Then,
+%	$\Pr[|\sum_{i=1}^{m} Y_i| \ge t] \le \frac{\max\{\ell^\ell, (\ell V)^{\ell/2}\} + \eps \cdot m^{\ell}}{t^{\ell}}.$
+%\end{corollary}
+%\begin{proof}
+%		By the assumption $|\E[X_{i_1} \cdots X_{i_\ell}] - \E[Y_{i_1} \cdots Y_{i_\ell}]| \le \eps$  we get 
+%		$$\E[(Y_1 + \ldots +Y_m)^{\ell}] \le \E[(X_1 + \ldots +X_m)^{\ell}] + \eps m^{\ell}.$$
+%		By Lemma~\ref{lemma:tail_bounds} we get 
+%		$\E[(Y_1 + \ldots +Y_m)^{\ell}] \le \max\{\ell^\ell, (\ell V)^{\ell/2}\} + \eps \cdot m^{\ell}.$
+%		Applying Markov's inequality promised gives the  bound on $
+%\Pr[|\sum_{i=1}^{m} Y_i| \ge t] = 	
+%\Pr[(\sum_{i=1}^{m} Y_i)^{\ell}  \ge t^{\ell}]$
+%\end{proof}
+
+	
+
+
+
+\subsection{Branching Programs}
+A {\sf read-once branching program (ROBP)} $B$ of {\sf length} $n$ and {\sf width} $w$ is a directed layered graph with $n+1$ layers of vertices denoted $V_1, \ldots, V_{n+1}$.  Each $V_i$ consists of $w_i \le w$ vertices $\{v_{i,1}, \ldots, v_{i,w_i}\}$, and between every two consecutive layers $V_i$ and $V_{i+1}$ there exists a set of directed edges (from $V_i$ to $V_{i+1}$), denoted $E_i$, such that any vertex in $V_i$ has precisely two out-going edges in $E_i$, one marked by $1$ and one marked by $-1$. %$V_1$ consists of a single vertex, denoted $v_{1,1}$.  
+$V_{n+1}$  vertices are marked with either `accept' and `reject'.
+
+A branching program $B$ and an input $x\in \pmone^n$ naturally describes a {\sf computation~path} in the layered graph:
+we start at node $v_1 = v_{1,1}$ in $V_1$.
+For $i=1, \ldots, n$, we traverse the edge going out from $v_i$ marked by $x_i$ to get to a node $v_{i+1} \in V_{i+1}$.
+The resulting computation path is $v_1 \to v_2 \to \ldots \to v_{n+1}$.
+We say that $B$ accepts $x$ iff the computation path defined by $B$ and $x$ reaches an accepting node. Naturally $B$ describes a Boolean function $B:\pmone^n \to \pmone$ whose value is $-1$ on input $x$ iff $B$ accepts $x$.
+
+{\sf Unordered branching programs} are defined similarly, expect that there exists a permutation $\pi \in S_n$ such that in step $i$ the computation path follows the edge marked by $x_{\pi_i}$, for $i\in [n]$.
+We also consider unordered branching programs on $[n]$ of shorter length $n'\le n$. In such case, the program stops after reading $n'$ input bits. \footnote{Note that since we are in the unordered case, the set of bits being read could be an arbitrary subset of $[n]$ of size $n'$.}
+
+For two programs $B_1$ and $B_2$ defined over disjoint sets of variables and having the end width of $B_1$ equal the start width of $B_2$, we denote by $B_1 \circ B_2$ the concatenation of $B_1$ and $B_2$, defined in the natural way.
+
+
+
+
+The following is a restatement of a result from \cite{CHRT17}. We give its proof for completeness in Appendix~\ref{app:CHRT}.
+\begin{theorem}\label{thm:CHRTa}
+Let $B$ be an unordered oblivious read-once branching programs with width-$w$ and length-$n$. Let $\eps>0$, $p \le 1/O(\log n)^w$, $k = O(\log(n/\eps))$, and $\D_p$ be a $\delta_T$-biased distribution over subsets of $[n]$ with marginals $p$, 
+for some $\delta_T \le p^{2k}$.
+Then,
+with probability at least $1-\eps$ over $T\sim \D_p$, 
+\[
+L_1(\tilde{B}) =  \sum_{S \subseteq T}{ |\hat{B}(S)|} \le O((nw)^3/\eps).\]
+\end{theorem}
+
+\begin{theorem}[Implied by \protect{\cite[Thm.~2]{CHRT17}} and \protect{\cite[Thm.~4.1]{SteinkeVW14}}]\label{thm:CHRT}
+Let $\mathcal{C}$ be the class of all unordered oblivious read-once branching programs on $[n]$ of length at most $n'$ and width at most $w$.
+Then,
+there exists an explicit pseudorandom generator 
+\[
+\mathbf{CHRT}:\pmone^{s_{n,n',w,\eps}}\to \pmone^n
+\]
+that $\eps$-fools $\mathcal{C}$, 
+where $s_{n,n',w, \eps} = O(\log(n')^{w+1} \log\log(n') \log(n/\eps))$.
+\end{theorem}
+
+
+\subsection{Helpful Lemmas}
+
+\begin{lemma}\label{lemma:var}
+Let $a,b>0$.
+If $X$ is a real-valued random variable bounded in $[-b,a]$ with mean $0$, then $\var[X] \le ab$.
+\end{lemma}
+	\begin{proof}
+		$\var[X] = \E[X^2]$ since $\E[X]=0$. As $x^2$ is convex and $X$ domain is bounded, the maximal value that $\E[X^2]$ can get is if all of $X$'s probability mass is on the boundary. 
+		Denote by $p = \Pr[X=a]$.
+		Since $\E[X]=0$ we get $0 = p\cdot a + (1-p) \cdot (-b)$, i.e., $p = b/(a+b)$, thus 
+		\[ \var[X] = \E[X^2] \le a^2 p + (1-p)b^2 = \frac{a^2 b}{a+b} + \frac{ab^2}{a+b} = ab\;.\qedhere\]
+	\end{proof}
+
+
+\begin{theorem}[Hyper-contractivity of Variance]\label{thm:HC}
+Let $f: \pmone^k \to \pmone$ be a Boolean function.
+Then, 
+$\E_{T\sim \Rp}[\var[\tilde{f}]] \le p \cdot \var[f]$. Furthermore, if $p \le 1/3$, then
+$\E_{T\sim \Rp}[\var[\tilde{f}]] \le \var[f]^{3/2}$.
+%$\E_{T\sim \Rp}[\var[\tilde{f}]] \le \var[f]^{2/(1+p)}$.
+\end{theorem}
+
+\begin{proof}
+First, observe that using Fact~\ref{fact:bias-fnc-Fourier} and $\var[g] = \sum_{S\neq \emptyset} \hat{g}(S)^2$  we have
+$$\E_{T\sim \Rp}[\var[\tilde{f}]] = 
+\E_{T\sim \Rp}\bigg[\sum_{S\neq \emptyset} \widehat{(\Bias_T f)}(S)^2\bigg] = 
+\sum_{S\neq \emptyset} \hat{f}(S)^2 \cdot \Pr_{T\sim \Rp}[S \subseteq T] = 
+\sum_{S\neq \emptyset} {p^{|S|} \cdot \hat{f}(S)^2 }.$$
+For the first item, we have $\E_{T\sim \Rp}[\var[\tilde{f}]] = \sum_{S\neq \emptyset} {p^{|S|} \cdot \hat{f}(S)^2 } \le p \cdot \sum_{S\neq \emptyset} {\hat{f}(S)^2} = p\cdot \var[f]$.
+
+
+For the second item, we use the Hyper-contractivity Theorem \cite{Bonami70} (cf. \cite[Ch.~9]{OdonnellBook}) stating that $\|N_{\rho} g\|_2 \le \|g\|_{1+\rho^2}$ for any function $g:\pmone^n \to \R$ (where $N_{\rho}$ is the noise operator that satisfies $\hat{N_{\rho} g}(S) = \rho^{|S|} \cdot \hat{g}(S)$ for all $S\subseteq [n]$).
+%(where $(N_{\rho} g)(x) = \sum_{S \subseteq [n]} \rho^{|S|} \cdot \hat{g}(S) \cdot \prod_{i\in S} x_i$ is the noise operator applied to $g$).
+Take $g = f- \E[f]$ and $\rho = \sqrt{p}$.
+Then, \looseness=-1
+$$
+\E_{T\sim \Rp}[\var[\tilde{f}]] = \sum_{S\neq \emptyset} {p^{|S|} \cdot \hat{f}(S)^2 } =  
+\|N_{\sqrt{p}} g\|^{2}_2 \le \|g\|_{1+p}^{2} = \E_{x\sim U_k}[|g(x)|^{1+p}]^{2/(1+p)}
+$$
+We analyze the RHS.
+Let $\beta = \E[f]$. % and assume without loss of generality that $\beta\ge 0$. 
+Then, $\beta\in [-1,1]$, $\var[f] = 1-\beta^2$, and under the uniform distribution $|g(x)|$ gets value $|1-\beta| = 1-\beta$ with probability $(1+\beta)/2$ and value $|-1-\beta| = 1+\beta$ with probability $(1-\beta)/2$.
+We get 
+\begin{align*}
+	\E_{x\sim U_k}[|g(x)|^{1+p}]
+	&= \frac{1+\beta}{2} \cdot (1-\beta)^{1+p} + \frac{1-\beta}{2} \cdot (1+\beta)^{1+p} \\
+	&= (1-\beta^2) \cdot (\tfrac{1}{2} (1-\beta)^{p} + \tfrac{1}{2}(1+\beta)^{p}) 
+	\le 1-\beta^2 = \var[f]
+\end{align*}
+where the inequality follows by concavity of $x \mapsto x^{p}$.
+%
+%
+%Let $\alpha = \var[f]$.
+%Since $f$ is Boolean $\E[f]^2 = 1-\alpha$.
+%Without loss of generality $\E[f] = \sqrt{1-\alpha}$ and $f$ gets value $1$ with probability $(1+\sqrt{1-\alpha})/2$ and value $-1$ with probability $(1-\sqrt{1-\alpha})/2$.
+%We get 
+%$$
+%\E_x[|g(x)|^{4/3}]= \frac{1+\sqrt{1-\alpha}}{2} \cdot |(1-\sqrt{1-\alpha})^{4/3}| + \frac{1-\sqrt{1-\alpha}}{2} \cdot |(-1-\sqrt{1-\alpha})^{4/3}| \le \alpha
+%$$
+%where the last inequality was verified with wolfram alpha.
+Overall if $p\le 1/3$, then 
+$\E_{T\sim \Rp}[\var[\tilde{f}]]  \le   \var[f]^{2/(1+p)} \le  \var[f]^{3/2}$.
+\end{proof}
+
+
+
+
+
+
+\begin{lemma}\label{lemma:vars_prod}
+	Suppose $\D_p$ is $\delta_T$-biased distribution with marginals $p$.
+Let $\ell \in \N$.
+Let $f_1, \ldots, f_\ell: \pmone^n \to \R$ be real valued functions, not necessarily distinct.
+Then, $$\abs{\E_{T \sim \D_p}\left[ \prod_{i=1}^{\ell} \var[\tilde{f_i}] \right] - 
+\E_{T \sim \Rp}\left[ \prod_{i=1}^{\ell} \var[\tilde{f_i}]\right]} \;\le  \;\delta_T \cdot\prod_{i=1}^{\ell} \var[f_i].$$
+\end{lemma}
+\begin{proof}
+Using Fact~\ref{fact:bias-fnc-Fourier}, for any fixed $T$, we have
+\begin{align*}
+\prod_{i=1}^{\ell} \var[\tilde{f_i}] &= 
+\prod_{i=1}^{\ell} \sum_{S_i \neq \emptyset} \hat{f_i}(S_i)^2 \cdot \one_{\{S_i \subseteq T\}}	= \sum_{S_1, \ldots, S_{\ell} \neq \emptyset} \hat{f_1}(S_1)^2 \cdots \hat{f_\ell}(S_\ell)^2 \cdot \one_{\{S_1 \cup \ldots \cup S_{\ell} \subseteq T\}}.
+\end{align*}
+Thus,
+\begin{align*}
+\E_{T \sim \D_p}\left[ \prod_{i=1}^{\ell} \var[\tilde{f_i}]\right] = \sum_{S_1, \ldots, S_{\ell} \neq \emptyset} \hat{f_1}(S_1)^2 \cdots \hat{f_\ell}(S_\ell)^2 \cdot (p^{|S_1 \cup \ldots \cup S_{\ell}|} \pm \delta_T)
+\end{align*}
+and 
+\begin{align*}
+\E_{T \sim \Rp}\left[ \prod_{i=1}^{\ell} \var[\tilde{f_i}]\right] = \sum_{S_1, \ldots, S_{\ell} \neq \emptyset} \hat{f_1}(S_1)^2 \cdots \hat{f_\ell}(S_\ell)^2 \cdot p^{|S_1 \cup \ldots \cup S_{\ell}|}.
+\end{align*}
+The difference between the two is at most 
+$$\left|\E_{T \sim \D_p}\left[ \prod_{i=1}^{\ell} \var[\tilde{f_i}]\right] -  \E_{T \sim \Rp}\left[ \prod_{i=1}^{\ell} \var[\tilde{f_i}]\right]\right| \le \delta_T \cdot \sum_{S_1, \ldots, S_{\ell} \neq \emptyset} \hat{f_1}(S_1)^2 \cdots \hat{f_\ell}(S_\ell)^2 = \delta_T \cdot \prod_{i=1}^{\ell} \var[f_i],$$
+which completes the proof.
+%
+%
+%Using Fact~\ref{fact:bias-fnc-Fourier}, for any fixed $T$, we have
+%\begin{align*}
+%\prod_{i=1}^{\ell} \var[\tilde{f_i}] &= 
+%\prod_{i=1}^{\ell} \sum_{S_i \neq \emptyset} \hat{f_i}(S_i)^2 \cdot \one_{\{S_i \subseteq T_i\}}	= \sum_{S_1, \ldots, S_{\ell} \neq \emptyset} \hat{f_1}(S_1)^2 \cdots \hat{f_\ell}(S_\ell)^2 \cdot \one_{\{S_1 \cup \ldots \cup S_{\ell} \subseteq T\}}
+%\end{align*}
+%Thus,
+%\begin{align*}&\left|\E_{T \sim \D_p}\left[ \prod_{i=1}^{\ell} \var[\tilde{f_i}]\right] -  \E_{T \sim \Rp}\left[ \prod_{i=1}^{\ell} \var[\tilde{f_i}]\right]\right| 
+%\\&\le  \sum_{S_1, \ldots, S_{\ell} \neq \emptyset} \hat{f_1}(S_1)^2 \cdots \hat{f_\ell}(S_\ell)^2 \cdot \abs{\Pr_{T\sim \D_p}[S_1 \cup \ldots S_\ell \subseteq T] - \Pr_{T\sim \R_p}[S_1 \cup \ldots S_\ell \subseteq T]} \\
+%& \le \delta_T \cdot \sum_{S_1, \ldots, S_{\ell} \neq \emptyset} \hat{f_1}(S_1)^2 \cdots \hat{f_\ell}(S_\ell)^2 \\
+%&\le \delta_T \cdot \prod_{i=1}^{\ell} \var[f_i],\end{align*}
+%which completes the proof.
+%
+\end{proof}
+%\newpage

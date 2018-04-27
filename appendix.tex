@@ -1,0 +1,207 @@
+\appendix
+\section{Proof of Theorem~\ref{thm:CHRTa}}
+\label{app:CHRT}
+
+
+In this section, we view the Boolean functions computed by branching programs as functions $B: \pmone^n \to \B$. For any set $T \subseteq [n]$, this changes the sum $\sum_{S \subseteq T}{|\hat{B}(S)|}$ by a factor of $2$, which we can afford.
+
+Let $B$ be a ROBP of length $n$ and width $w$. Recall that $V_1, \ldots, V_{n+1}$ denote the layers of vertices in $B$.
+For a vertex $v \in V_i$ in the branching program we denote by $B_{\to v}$ the sub-branching program ending in the $i$-th layer and having  $v$ the only accepting state.
+We denote by $B_{v \to}$ the sub-branching program starting at $v$ and ending at $V_{n+1}$.
+Observe that we may express the function computed by the branching program $B$ as a sum of products of these sub-programs, namely 
+\begin{equation}\label{eq:bp-decomposition}
+\forall{i\in[n]}: \forall{x\in \pmone^n}: B(x) = \sum_{v\in V_i}{B_{\to v}(x) \cdot B_{v \to}(x)}.	
+\end{equation}
+
+The main technical result from \cite{CHRT17} is the following theorem:
+\begin{theorem}[\protect{\cite[Thm.~2]{CHRT17}}]\label{thm:main_fourier} Let $B$ be an ordered read-once, oblivious branching program of length $n$ and width $w$. Then, 
+	$$\forall{k\in [n]}: \;\;\sum_{s: |s|=k} \abs{\widehat{B}(s)} 
+	\le 
+	O(\log n)^{wk}\;.$$
+	\end{theorem}
+
+We are ready to prove a corollary of this theorem, namely Theorem~\ref{thm:CHRTa}.
+
+\begin{theorem}[Thm.~\ref{thm:CHRTa}, restated]
+Let $B$ be a width-$w$ length-$n$ ROBP. Let $\eps>0$, $p \le 1/O(\log n)^w$, $k = O(\log(n/\eps))$, and $\D$ be a $\delta_T$-biased distribution over $[n]$ with marginals $p$, where $\delta_T \le p^{2k}$.
+Then,
+with probability at least $1-\eps$ over $T\sim \D$, 
+\[L_1(\tilde{B}) =  \sum_{S \subseteq T}{ |\hat{B}(S)|} \le O((nw)^3/\eps).\]
+\end{theorem}
+
+\begin{claim}\label{claim:midlayers}
+For all $\beta>0$, the following holds with probability at least $1-\frac{w^2 \cdot n^3}{\beta}$ over $T$:   for all  $v_0$ and $v$ and $1\le j\leq \min\{2k,n\}$:
+\begin{equation}\label{eq:lowerlayers}\sum_{s \subseteq T, |s|=j}{ |\hat{B_{v_0 \to v}}(s)|} \le \frac{\beta}{2^j}.\end{equation}
+\end{claim}
+\begin{proof}
+Fix $v_0$ and $v$. Letting $M$ denote the branching program $B_{v_0 \to v}$ we get
+$
+\sum_{s:|s|=j} \abs{ \widehat{M}(s) } \leq O(\log n)^{wj}
+$ from Theorem~\ref{thm:main_fourier}.
+Thus,
+\begin{align*}
+\E_T\left[ \sum_{s:|s|=j} | \widehat{M}(s)| \cdot \one_{\{s \subseteq T\}}\right] = \sum_{s:|s|=j} 
+|\widehat{M}(s)| \cdot \Pr_{T}[s\subseteq T] \leq  O(\log n)^{wj} \cdot (p^j + \delta)\leq \frac{1}{2^j}.
+\end{align*}
+Finally, we conclude by applying the Markov inequality and a union bound, as there is a total of at most $w^2\cdot n^2$ branching programs $B_{v_0 \to v}$ and at most $n$ choices for $j$.
+\end{proof}
+
+Theorem~\ref{thm:CHRTa} follows from the next claim which uses Claim~\ref{claim:midlayers} with $\beta=(nw)^3 /\eps$ and $k =  O(\log (n/\eps))$ that ensure $\frac{w^2 \cdot n^3}{\beta}\leq \eps$ and  $\frac{\beta}{2^k}\leq \frac{\eps}{nw}$.
+Indeed, with probability at least $1-\eps$, the spectral-norm of $\tilde{B}$ is at most $1+\sum_{j=1}^{k}{\frac{\beta}{2^j}} + (n-k) \cdot \frac{\eps}{nw} \le 2+\beta$.
+%
+\begin{claim}
+Suppose that $T$ is such that the events in Claim~\ref{claim:midlayers} hold for $\beta, k$ such that $\beta/2^k \le \eps/(nw)$. 
+Then for every $j$ such that $k\le j \le n$, 
+\begin{equation}\label{eq:higherlayers}\sum_{s \subseteq T, |s|=j}{ |\hat{B}(s)|} \le \frac{\eps}{nw}.\end{equation}
+\end{claim}
+\begin{proof}
+We  prove by induction on $j$ that Eq.~\eqref{eq:higherlayers} holds for all $B_{\to v}$, for any $\ell\in [n+1]$ and $v\in V_\ell$. Note that $B$ itself is of the form $B_{\to v}$ for $v$ being the accept node in the final layer (w.l.o.g. there exists only one such node).   
+The case $k \le j \le 2k$ is handled by Claim~\ref{claim:midlayers}, since $\sum_{s\subseteq T:|s|=j}|\hat{B_{\to v}}(s)|  \le	 \frac{\beta}{2^j} \le \frac{\beta}{2^k} \le \frac{\eps}{(nw)^2}$. 
+For $j > 2k$ we have: 
+\begin{align*}
+\sum_{s\subseteq T: |s|=j} |\widehat{B_{\to v}}(s)| 
+&\le \sum_{i\in T \cap [\ell]} \sum_{v_0\in V_i} \;\;\sum_{\substack{s_0\subseteq T \cap \{1,\ldots,i-1\}:\\ |s_0|=j-k}}\;\;\sum_{\substack{s_1\subseteq T \cap \{i,\ldots, \ell \}:\\ |s_1|=k, i\in s_1}}\;\; \vert \widehat{B_{\to v_0}}(s_0)\cdot \widehat{B_{v_0\to v}}(s_1)\vert \tag{by \cref{eq:bp-decomposition}}\\
+& \le \sum_{i\in T \cap [\ell]} \sum_{v_0\in V_i} \Big(\sum_{\substack{s_0\subseteq T \cap \{1,\ldots,i-1\}:\\ |s_0|=j-k}}\vert\widehat{B_{\to v_0}}(s_0)\vert\Big)\cdot \Big(\sum_{\substack{s_1\subseteq T \cap \{i,\ldots, \ell\}:\\ |s_1|=k, i\in s_1}} \vert \widehat{ B_{v_0\to v}}(s_1)\vert \Big) \\
+&\le \sum_{i\in T \cap [\ell]} \sum_{v_0\in V_i} 
+\frac{\eps}{nw}
+\cdot 
+\frac{\eps}{nw}
+\le \frac{\eps}{nw} \tag{induction and Claim~\ref{claim:midlayers}}
+\end{align*}
+This completes the induction, and hence the claim follows.
+\end{proof}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Restatement of XOR-lemma for functions fooled by small-biased spaces}
+\label{app:GMRTV}
+In this section we show how Lemma~\ref{lemma:3.2} is a restatement of Thm~4.1 in \cite{GopalanMRTV12}. We recall the following equivalence between having sandwiching approximations with small spectral-norm and being fooled by every small-biased distribution.
+\begin{lemma}[\cite{DETT10}]\label{lem:DETT}
+Let $f: \pmone^n \to \R$ be a function. Then, the following hold for every $0 < \eps < \delta$:
+\begin{itemize}
+	\item If $f$ has $\delta$-sandwiching approximations of spectral-norm at most $\delta/\eps$, then for every $\eps$-biased distribution $D$ on $\pmone^n$, $|\E_{x\sim D}[f(x)] - \E[f]| \le \delta$.
+	\item If for every $\eps$-biased distribution $D$ on $\pmone^n$, $|\E_{x\sim D}[f(x)] - \E[f]| \le \delta$, then $f$ has $(2\delta)$-sandwiching approximations of spectral-norm at most $1+\delta/\eps$.
+\end{itemize}
+\end{lemma}
+We recall \cite[Thm.~4.1]{GopalanMRTV12}.
+\begin{theorem}[\protect{\cite[Thm.~4.1]{GopalanMRTV12}}]\label{thm:GMRTV:4.1}
+ 	Let $F_1, \ldots, F_k : \pmone^n \to [0,1]$ be functions on disjoint input variables such that each $F_i$ has $\delta$-sandwiching approximation of spectral-norm at most $t$.
+ 	Let $H:[0,1]^k \to [0,1]$ be a multilinear function in its inputs.
+ 	Let $h: \pmone^n \to [0,1]$ be defined as $h(x) = H(F_1(x), \ldots, F_k(x))$. Then $h$ has $(16^k\delta)$-sandwiching approximations of spectral-norm at most $4^k(t+1)^k$. 	
+\end{theorem}
+
+%We include a proof for completeness.
+%\begin{proof}
+%	We write $H(x) = \sum_{z\in \B^k}H(z) \cdot \prod_{i:z_i=1}(x_i) \cdot \prod_{i:z_i=1} (1-x_i)$.
+%	We prove that $h(x) = H(F_1, \ldots, F_k)$ has as an upper sandwiching approximation with small spectral-norm.
+%	We take
+%	$$u(x) = \sum_{z \in \B^k} H(z) \prod_{i:z_i=1}(u_i(x)) \cdot \prod_{i:z_i=1} (1-\ell_i(x)).$$
+%	For any $z\in \B^k$ we have $$\prod_{i:z_i=1}(F_i(x)) \cdot \prod_{i:z_i=1} (1-F_i(x)) \le \prod_{i:z_i=1}(u_i(x)) \cdot \prod_{i:z_i=1} (1-\ell_i(x)),$$ and since all $H(z) \ge 0$ we get $h(x) \le u(x)$.
+%	We bound the expected difference between the two monomials. Let $\mu_i = \E[F_i]$ for $i=1, \ldots, k$. Then,
+%	\begin{align*}
+%	\E_{x}&\left[\prod_{i:z_i=1} u_i(x) \cdot \prod_{i:z_i=1} (1-\ell_i(x)) - \prod_{i:z_i=1} F_i(x) \cdot \prod_{i:z_i=1} (1-F_i(x))\right]\\
+%	&\le \prod_{i:z_i=1} (\mu_i + \delta) \cdot \prod_{i:z_i=0} (1-\mu_i + \delta)  -  \prod_{i:z_i=1} (\mu_i ) \cdot \prod_{i:z_i=0} (1-\mu_i) \le (1+\delta)^k - 1
+%	\end{align*}
+%	where the last inequality can be proved by induction on $k$ noting that all $\mu_i$ and $1-\mu_i$ are in the interval $[0,1]$. That is, we use the fact that for all $k\in \N$ and any $\alpha_1, \ldots, \alpha_k\in [0,1]$
+%	$$(\alpha_1 +\delta)\cdots (\alpha_k+ \delta) - \alpha_1 \cdots \alpha_k \le (1+\delta)^k - 1.$$
+%		We can assume without loss of generality that $\delta k \le 1$ (as otherwise the conclusion would trivially hold with $u \equiv 1$) and get that $((1+\delta)^k-1) \le 2\delta k$.
+%	Overall we got an upper sandwiching approximation with error at most $2^{k} \cdot 2\delta k$ and spectral-norm at most $2^k \cdot (t+1)^k$.
+%	
+%	To get a lower sandwiching approximation, we take an upper sandwiching approximation for $G(F_1, \ldots, F_k)$ where $G(x) = 1-H(x)$. Let $u'(x)$ be this polynomial.
+%	By the same analysis $\E_{x\sim U_n}[u'(x) - G(F_1(x), \ldots, F_k(x))] \le 2^{k} \cdot 2\delta k$ and $u'$ has $L_1$-norm at most $2^k \cdot (t+1)^k$.
+%	Finally we take $\ell(x) = 1-u'(x)$. We have that $\ell(x) \le h(x)$ for all $x\in \pmone^n$, the spectral-norm of $\ell$ is at most $1+2^k \cdot (t+1)^k$ and $\E_{x\sim U_n}[h(x) - \ell(x)]\le 2^{k} \cdot 2\delta k$.
+%\end{proof}
+
+
+
+
+We translate the domain $[0,1]$ to $[-1,1]$ to get  a restatement of the previous theorem.
+\begin{theorem}[\protect{\cite[Thm.~4.1]{GopalanMRTV12}, $\pm1$-version}]\label{thm:GMRTV:4.1-new-version}
+ 	Let $F_1, \ldots, F_k : \pmone^n \to [-1,1]$ be functions on disjoint input variables such that each $F_i$ has $\delta$-sandwiching approximation of spectral-norm at most $t$.
+ 	Let $H:[-1,1]^k \to [-1,1]$ be a multilinear function in its inputs.
+ 	Let $h: \pmone^n \to [-1,1]$ be defined as $h(x) = H(F_1(x), \ldots, F_k(x))$. Then $h$ has $(16^k\delta)$-sandwiching approximations of spectral-norm at most $2^{k+1}(t+4)^k$.
+\end{theorem}
+\begin{proof} We take $F'_1, \ldots, F'_k$ to be $\frac{F_1+1}{2}, \ldots, \frac{F_{k}+1}{2}$ respectively.
+We get that $F'_i$ has $\delta/2$-sandwiching approximations of spectral-norm at most $(t+1)/2$, for all $i\in \{1,\ldots, k\}$.
+We take $H':[0,1]^k\to [0,1]$ to be 
+$H'(y_1, \ldots, y_k) = \frac{1+H(2y_1 - 1, \ldots, 2y_k-1)}{2}$.
+Since $H$ is multilinear, so is $H'$.
+By Theorem~\ref{thm:GMRTV:4.1}, we get that $H'(F'_1, \ldots, F'_k)$ 
+has $(16^{k} \cdot \delta/2)$-sandwiching approximations of spectral-norm at most $4^k(\frac{t+1}{2}+1)^k$.
+Since $H(F_1, \ldots, F_k) = 2\cdot H'(F'_1, \ldots, F'_k) - 1$
+we got that $H$ as a $(16^{k} \cdot \delta)$-sandwiching approximations of spectral-norm at most $1+2\cdot4^k(\frac{t+1}{2}+1)^k = 1+2\cdot 2^{k}(t+3)^k \le 2^{k+1} \cdot (t+4)^k$.
+\end{proof} 
+	
+Finally, we restate Lemma~\ref{lemma:3.2} and prove it.
+\begin{lemma}
+	Let $0 < \eps< \delta\le 1$.
+ 	Let $F_1, \ldots, F_k : \pmone^n \to [-1,1]$ be functions on disjoint input variables such that each $F_i$ is $\delta$-fooled by any $\eps$-biased distribution.
+ 	Let $H:[-1,1]^k \to [-1,1]$ be a multilinear function in its inputs.
+ 	Then $H(F_1(x), \ldots, F_k(x))$ is $(16^k \cdot 2\delta)$-fooled by any $\eps^k$-biased distribution.
+\end{lemma}
+\begin{proof}
+	Using the second item in Lemma~\ref{lem:DETT}, since $F_1, \ldots, F_k$ are $\delta$-fooled by any $\eps$-biased distribution, we have that there exist $2\delta$-sandwiching approximations of spectral-norm at most $1  + \delta/\eps$.
+	Thus by Thm.~\ref{thm:GMRTV:4.1-new-version}, $H(F_1, \ldots, F_k)$ has $ (16^k \cdot 2 \delta)$-sandwiching approximations of spectral-norm at most $2^{k+1} \cdot (\delta/\eps + 5)^k$.
+	Set $\delta' := 16^k \cdot 2 \delta$ and $\eps' := \delta'/(2^{k+1} \cdot (\delta/\eps + 5)^k)$. Then, $H(F_1, \ldots, F_k)$ has $ \delta'$-sandwiching approximations of spectral-norm at most $\delta'/\eps'$.
+	Using the first item in Lemma~\ref{lem:DETT} (noting that $\eps'<\delta'$), any $\eps'$-biased distribution $\delta'$-fools $H(F_1, \ldots, F_k)$.
+	A small calculation shows that $\eps' \ge \eps^k$, hence any $\eps^k$-biased distribution also $\delta'$-fools $H(F_1, \ldots, F_k)$.
+	\end{proof}
+	% A small calculation:
+	%eps' = 16^k * 2 delta/(2^{k+1} * (delta/eps+5)^k) 
+	%\ge 8^k * delta / (6delta/eps)^k = (eps*8/6)^k * delta^{-(k-1)} >= eps^k
+	%%%%%%%%%%%%
+
+
+%\section{Deferred Proofs from Section~\ref{sec:assign_all}}\label{sec:aggressive}
+
+
+
+
+
+
+
+\section{Pseudorandom restrictions for the composition of 3ROBPs}\label{app:composition 3ROBPs}
+We restate and prove Lemma~\ref{lemma:fooling H of width-3}.
+\begin{lemma}
+Let $f_1, \ldots, f_k$ be 3ROBPs on disjoint sets of variables of $[n]$. 
+Let $H:\pmone^k \to \pmone$ be any Boolean function.
+Then, $f = H(f_1, f_2, \ldots, f_k)$ is $\eps\cdot ((n+k)/k)^k$-fooled by the pseudorandom partial assignment in Theorem~\ref{thm:main_two_steps}.
+\end{lemma}
+\begin{proof}
+Let $V(f_1), \ldots, V(f_k)$ be the sets of variables on which $f_1, \ldots, f_k$ depend.
+We write $H$ in the Fourier basis:
+$H(y_1, \ldots, y_k) = \sum_{S\subseteq [k]} \hat{H}(S) \cdot \prod_{i\in S}{y_i}$.
+Thus,
+$H(f_1(x), \ldots, f_k(x)) = \sum_{S\subseteq [k]} \hat{H}(S) \cdot \prod_{i\in S}{f_i(x)}$.
+Recall that the pseudorandom assignment in Theorem~\ref{thm:main_two_steps} is composed of two stages:
+Let $\eps_1 = \eps/2$ and $\eps_2 = \eps/2n$.
+\begin{enumerate}
+	\item Pick $T_0 \subseteq [n]$ using a $(\eps_1/n)^{10}$-biased distribution with marginals $1/2$.
+	\item Assign the coordinates in $[n]\setminus T_0$ uniformly at random.
+	\item
+	\begin{enumerate}
+	\item Pick $T\subseteq T_0$ using a $\delta_T$-biased distribution with marginals $p = 1/O(\log \log ( n/\eps_2))^{6}$.
+	\item  Assign the coordinates in $T_0\setminus T$ uniformly at random.
+	\item Assign the coordinates in $T$ using a $(\eps_2/n)^{O(\log \log (n/\eps_2))}$-biased distribution $\Dx$.
+	\end{enumerate}
+\end{enumerate}
+Recall that for a fixed $T_0$,  the bias-function of the program behaves the same under any relabeling of the layers in $[n]\setminus T_0$. We imagine as if these layers are relabeled so that a collision is possible, and denote this relabeled program by $f_i^{T_0}$.
+We have $\Bias_{T_0}(f_i)(x) = \E_{y\sim U_{[n]\setminus T_0}}[(f_i^{T_0})_{T_0|y}(x)]$ and similarly
+since the sets $V(f_1), \ldots, V(f_k)$ are disjoint
+$\Bias_{T_0}(H(f_1, \ldots, f_k))(x) = \E_{y\sim U_{[n]\setminus T_0}}[H((f_1^{T_0})_{T_0|y}(x), \ldots, (f_k^{T_0})_{T_0|y}(x))]$.
+By Theorem~\ref{thm:the-bias-trick} and~\ref{thm:BDVY}, with  probability at least $1-\eps_1\cdot k$ the choice of $T_0$ and $y$, we can write each $(f_i^{T_0})_{T_0|y}(x)$ for $i=1, \ldots, k$ as a linear combination of $\prod_{j \in [m_i]}[f_{i,j}]$ where the sum of coefficients in absolute value is at most the number of variables in $f_i$ (i.e., $|V(f_i)|$), and each $f_{i,j}$ is a ROBP on at most $O(\log(n/\eps))$ bits.
+Overall with high probability over $T_0, y$ the product $\prod_{i\in S} (f_i^{T_0})_{T_0|y}$ can be written as a linear combination of the functions $\prod_{i\in S} \prod_{j \in [m_i]}[f_{i,j}]$ where the sum of coefficients in absolute values in the linear combination is at most $\prod_{i\in S}{|V(f_i)|}$.
+Thus, $H((f_1^{T_0})_{T_0|y}, \ldots (f_k^{T_0})_{T_0|y})$ can be written as a linear combination of XOR of $O(\log(n/\eps))$-length width-3 ROBPs where the sum of coefficients is a most
+$$
+\sum_{S\subseteq [k]} |\hat{H}(S)| \cdot \prod_{i\in S}|V(f_i)| 
+\le \sum_{S\subseteq [k]} 1 \cdot \prod_{i\in S}|V(f_i)| 
+= \prod_{i=1}^{k}(1+|V(f_i)|) 
+\le ((n+k)/k)^k
+$$
+where in the last inequality we used the fact that the sets $V(f_1), \ldots, V(f_k)$ are disjoint along with a convexity argument.
+
+By Theorem~\ref{thm:main}, each XOR of $O(\log(n/\eps))$-length width-3 ROBPs is $\eps_2$-fooled by the pseudorandom assignment defined by Step~3 above, thus the overall error is at most $\eps_1\cdot k + \eps_2 \cdot ((n+k)/k)^k \le \eps\cdot ((n+k)/k)^k$.
+\end{proof}
+
+
